@@ -7,8 +7,8 @@ namespace Ks.Fiks.Maskinporten.Client
         public string Issuer{ get; set; }
         public int NumberOfSecondsLeftBeforeExpire{ get; set; }
 
-        public MaskinportenClientProperties(string audience, string tokenEndpoint, string issuer,
-            int numberOfSecondsLeftBeforeExpire)
+        public MaskinportenClientProperties(string audience = "standardAudience", string tokenEndpoint = "http://temp.no", string issuer = "standardValue",
+            int numberOfSecondsLeftBeforeExpire = 100)
         {
             Audience = audience;
             TokenEndpoint = tokenEndpoint;
