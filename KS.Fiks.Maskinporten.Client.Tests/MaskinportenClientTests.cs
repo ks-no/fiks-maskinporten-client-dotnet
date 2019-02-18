@@ -108,6 +108,127 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         }
 
         [Fact]
+        public async Task AssertionIsAValidSerializedJwt()
+        {
+            var sut = _fixture.CreateSut();
+            
+            await sut.GetAccessToken(_fixture.DefaultScopes);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    TestHelper.RequestContentIsJwt(req, "assertion")
+                ),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+
+        [Fact]
+        public async Task AssertionDeserializedHasCorrectAudience()
+        {
+            var expectedAudience = "testAudience";
+            _fixture.Properties.Audience = expectedAudience; 
+            var sut = _fixture.CreateSut();
+            
+            await sut.GetAccessToken(_fixture.DefaultScopes);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    TestHelper.DeserializedFieldInJwt(req,"assertion", "aud") == expectedAudience
+                ),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+        
+        [Fact]
+        public async Task AssertionDeserializedHasCorrectIssuer()
+        {
+            var expectedIssuer = "testIssuer";
+            _fixture.Properties.Issuer = expectedIssuer; 
+            var sut = _fixture.CreateSut();
+            
+            await sut.GetAccessToken(_fixture.DefaultScopes);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    TestHelper.DeserializedFieldInJwt(req,"assertion", "iss") == expectedIssuer
+                ),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+        
+        [Fact]
+        public async Task AssertionDeserializedHasCorrectScope()
+        {
+            var expectedScope = new string[]
+            {
+                "Scope1", "Scope2"
+            };
+
+            var expectedScopeAsString = string.Join(" ", expectedScope);
+            
+            var sut = _fixture.CreateSut();
+            
+            await sut.GetAccessToken(expectedScope);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    TestHelper.DeserializedFieldInJwt(req,"assertion", "Scope") == expectedScopeAsString
+                ),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+        
+        [Fact]
+        public async Task AssertionDeserializedHasIssueTimeWithinASecondOfNow()
+        {
+
+            var sut = _fixture.CreateSut();
+            
+            await sut.GetAccessToken(_fixture.DefaultScopes);
+            var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "iat")) <= now + 1 &&
+                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "iat")) >= now - 1 
+
+                ),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+        
+        [Fact]
+        public async Task AssertionDeserializedHasExpieryTimeTwoMinutesAfterNow()
+        {
+            var sut = _fixture.CreateSut();
+            
+            await sut.GetAccessToken(_fixture.DefaultScopes);
+            var expectedExpiredTime = DateTimeOffset.Now.AddMinutes(2).ToUnixTimeSeconds();
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "exp")) <= expectedExpiredTime + 1 &&
+                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "exp")) >= expectedExpiredTime - 1 
+
+                ),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+
+        
+        [Fact]
         public async Task SendsHeaderCharsetUtf8()
         {
             var sut = _fixture.CreateSut();

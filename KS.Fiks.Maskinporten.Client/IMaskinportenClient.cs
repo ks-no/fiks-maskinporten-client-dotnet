@@ -6,5 +6,8 @@ namespace Ks.Fiks.Maskinporten.Client
     public interface IMaskinportenClient
     {
         Task<string> GetAccessToken(IEnumerable<string> scopes);
+        
+        Task<string> GetAccessToken(string scopes);
+
     }
 }

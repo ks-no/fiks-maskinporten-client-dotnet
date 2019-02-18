@@ -1,9 +1,15 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using JWT;
+using JWT.Algorithms;
+using JWT.Builder;
+using JWT.Serializers;
 using Newtonsoft.Json;
 
 namespace Ks.Fiks.Maskinporten.Client
@@ -11,7 +17,7 @@ namespace Ks.Fiks.Maskinporten.Client
     public class MaskinportenClient : IMaskinportenClient
     {
         private const string GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
-
+        private const int JWT_EXPIRE_TIME_IN_MINUTES = 2;
 
         private MaskinportenClientProperties _properties;
         private HttpClient _httpClient;
@@ -26,28 +32,27 @@ namespace Ks.Fiks.Maskinporten.Client
 
         public async Task<string> GetAccessToken(IEnumerable<string> scopes)
         {
-            var scopeKey = ScopesToKey(scopes);
-            if (HasValidCachedAccessToken(scopeKey))
+            var scopesAsString = ScopesAsString(scopes);
+            return await GetAccessToken(scopesAsString);
+        }
+        
+        public async Task<string> GetAccessToken(string scopes)
+        {
+            if (HasValidCachedAccessToken(scopes))
             {
-                return _accessTokenCache[scopeKey];
+                return _accessTokenCache[scopes];
             }
 
-            var accessToken = await GetNewAccessToken();
-            StoreAccessTokenInCache(accessToken, scopeKey);
+            var accessToken = await GetNewAccessToken(scopes);
+            StoreAccessTokenInCache(accessToken, scopes);
 
             return accessToken;
         }
 
 
-        private string ScopesToKey(IEnumerable<string> scopes)
+        private string ScopesAsString(IEnumerable<string> scopes)
         {
-            var keyBuffer = new StringBuilder();
-            foreach (var scope in scopes)
-            {
-                keyBuffer.Append(scope);
-            }
-
-            return keyBuffer.ToString();
+            return string.Join(" ", scopes);
         }
 
         private bool HasValidCachedAccessToken(string scopeKey)
@@ -55,10 +60,11 @@ namespace Ks.Fiks.Maskinporten.Client
             return _accessTokenCache.ContainsKey(scopeKey);
         }
 
-        private async Task<string> GetNewAccessToken()
+        private async Task<string> GetNewAccessToken(string scopes)
         {
             SetRequestHeaders();
-            var response = await _httpClient.PostAsync(_properties.TokenEndpoint, CreateRequestContent());
+            var requestContent = CreateRequestContent(scopes);
+            var response = await _httpClient.PostAsync(_properties.TokenEndpoint, requestContent);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw new UnexpectedResponseException(
@@ -77,12 +83,12 @@ namespace Ks.Fiks.Maskinporten.Client
             };
         }
 
-        private ByteArrayContent CreateRequestContent()
+        private ByteArrayContent CreateRequestContent(string scopes)
         {
             var request = new MaskinportenRequest()
             {
                 GrantType = GRANT_TYPE,
-                Assertion = "something"
+                Assertion = CreateJwtToken(scopes)
             };
             var requestAsJson = JsonConvert.SerializeObject(request);
             var requestAsByteArray = Encoding.UTF8.GetBytes(requestAsJson);
@@ -102,6 +108,23 @@ namespace Ks.Fiks.Maskinporten.Client
         private void StoreAccessTokenInCache(string accessToken, string scopeKey)
         {
             _accessTokenCache.Add(scopeKey, accessToken);
+        }
+
+        private string CreateJwtToken(string scopes)
+        {
+            const string secret = "GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk";
+
+            var jwt = new JwtBuilder()
+                      .WithAlgorithm(new HMACSHA256Algorithm())
+                      .WithSecret(secret)
+                      .Audience(_properties.Audience)
+                      .Issuer(_properties.Issuer)
+                      .IssuedAt(DateTime.Now)
+                      .ExpirationTime(DateTime.Now.AddMinutes(JWT_EXPIRE_TIME_IN_MINUTES))
+                      .AddClaim("Scope",scopes)
+                      .Build();
+
+            return jwt;
         }
     }
 }
