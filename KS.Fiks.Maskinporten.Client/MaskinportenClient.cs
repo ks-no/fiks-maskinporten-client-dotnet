@@ -18,7 +18,6 @@ namespace Ks.Fiks.Maskinporten.Client
         private const string GrantType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
         private const int JwtExpireTimeInMinutes = 2;
 
-
         private readonly MaskinportenClientProperties _properties;
         private readonly HttpClient _httpClient;
         private readonly X509Certificate2 _certificate;

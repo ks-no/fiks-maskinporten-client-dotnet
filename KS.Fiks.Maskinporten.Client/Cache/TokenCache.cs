@@ -1,30 +1,41 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ks.Fiks.Maskinporten.Client.Cache
 {
-    public class TokenCache<T> : ITokenCache<T>
+    public class TokenCache<T> : ITokenCache<T>, IDisposable
     {
+        private const int DefaultFactoryTimeoutInSeconds = 7;
+        
         private readonly TimeSpan _expirationTime;
-        private readonly ConcurrentDictionary<string, TimedCacheEntry<T>> _cacheDictionary;
+        private readonly Dictionary<string, TimedCacheEntry<T>> _cacheDictionary;
+        private readonly SemaphoreSlim _mutex;
+        
 
         public TokenCache(TimeSpan expirationTime)
         {
             _expirationTime = expirationTime;
-            _cacheDictionary = new ConcurrentDictionary<string, TimedCacheEntry<T>>();
+            _cacheDictionary = new Dictionary<string, TimedCacheEntry<T>>();
+            _mutex = new SemaphoreSlim(1 );
+
         }
 
         public async Task<T> GetToken(string tokenKey, Func<Task<T>> tokenFactory)
         {
-            if (HasValidEntry(tokenKey))
+            await _mutex.WaitAsync();
+            try
             {
-                return _cacheDictionary[tokenKey].Value;
+                return HasValidEntry(tokenKey)
+                    ? _cacheDictionary[tokenKey].Value
+                    : await UpdateOrAddToken(tokenKey, tokenFactory);
             }
-            
-            return await UpdateOrAddToken(tokenKey, tokenFactory);
-
+            finally
+            {
+                _mutex.Release();
+            }
         }
 
         private bool HasValidEntry(string tokenKey)
@@ -41,22 +52,22 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
         {
             var newToken = await tokenFactory();
             var newEntry = new TimedCacheEntry<T>(newToken);
-            _cacheDictionary.AddOrUpdate(tokenKey, newEntry,
-                (key, currentEntry) => HandleCacheEntryUpdate(key, currentEntry, newEntry));
+            if (_cacheDictionary.ContainsKey(tokenKey))
+            {
+                _cacheDictionary[tokenKey] = newEntry;
+            }
+            else
+            {
+                _cacheDictionary.Add(tokenKey, newEntry);
+            }
+
             return newToken;
         }
 
-        private TimedCacheEntry<T> HandleCacheEntryUpdate(
-            string tokenKey, 
-            TimedCacheEntry<T> currentEntry,
-            TimedCacheEntry<T> newEntry)
+
+        public void Dispose()
         {
-            if (!currentEntry.IsExpired(_expirationTime))
-            {
-                // Log this, as it means that we are in a race condition
-            }
-            return newEntry;
-        } 
-       
+            _mutex?.Dispose();
+        }
     }
 }
