@@ -1,37 +1,37 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using JWT;
 using JWT.Algorithms;
 using JWT.Builder;
-using JWT.Serializers;
+using Ks.Fiks.Maskinporten.Client.Cache;
 using Newtonsoft.Json;
 
 namespace Ks.Fiks.Maskinporten.Client
 {
     public class MaskinportenClient : IMaskinportenClient
     {
-        private const string GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
-        private const int JWT_EXPIRE_TIME_IN_MINUTES = 2;
+        private const string GrantType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+        private const int JwtExpireTimeInMinutes = 2;
 
-        private MaskinportenClientProperties _properties;
-        private HttpClient _httpClient;
-        private X509Certificate2 _certificate;
-       
-        private Dictionary<string, string> _accessTokenCache;
 
-        public MaskinportenClient(X509Certificate2 certificate, MaskinportenClientProperties properties,   HttpClient httpClient = null)
+        private readonly MaskinportenClientProperties _properties;
+        private readonly HttpClient _httpClient;
+        private readonly X509Certificate2 _certificate;
+
+        private readonly ITokenCache<string> _tokenCache;
+
+        public MaskinportenClient(X509Certificate2 certificate, MaskinportenClientProperties properties,
+            HttpClient httpClient = null)
         {
             _properties = properties;
             _certificate = certificate;
             _httpClient = httpClient ?? new HttpClient();
-            _accessTokenCache = new Dictionary<string, string>();
+            _tokenCache = new TokenCache<string>(TimeSpan.FromSeconds(_properties.NumberOfSecondsLeftBeforeExpire));
         }
 
         public async Task<string> GetAccessToken(IEnumerable<string> scopes)
@@ -39,18 +39,10 @@ namespace Ks.Fiks.Maskinporten.Client
             var scopesAsString = ScopesAsString(scopes);
             return await GetAccessToken(scopesAsString);
         }
-        
+
         public async Task<string> GetAccessToken(string scopes)
         {
-            if (HasValidCachedAccessToken(scopes))
-            {
-                return _accessTokenCache[scopes];
-            }
-
-            var accessToken = await GetNewAccessToken(scopes);
-            StoreAccessTokenInCache(accessToken, scopes);
-
-            return accessToken;
+            return await _tokenCache.GetToken(scopes, async () => await GetNewAccessToken(scopes));
         }
 
 
@@ -59,10 +51,6 @@ namespace Ks.Fiks.Maskinporten.Client
             return string.Join(" ", scopes);
         }
 
-        private bool HasValidCachedAccessToken(string scopeKey)
-        {
-            return _accessTokenCache.ContainsKey(scopeKey);
-        }
 
         private async Task<string> GetNewAccessToken(string scopes)
         {
@@ -74,6 +62,7 @@ namespace Ks.Fiks.Maskinporten.Client
                 throw new UnexpectedResponseException(
                     $"Got unexpected HTTP Status code {response.StatusCode} ({response.ReasonPhrase}) from {_properties.TokenEndpoint}");
             }
+
             var maskinportenResponse = await ReadResponse(response);
             return maskinportenResponse.AccessToken;
         }
@@ -91,7 +80,7 @@ namespace Ks.Fiks.Maskinporten.Client
         {
             var request = new MaskinportenRequest()
             {
-                GrantType = GRANT_TYPE,
+                GrantType = GrantType,
                 Assertion = CreateJwtToken(scopes)
             };
             var requestAsJson = JsonConvert.SerializeObject(request);
@@ -101,7 +90,7 @@ namespace Ks.Fiks.Maskinporten.Client
             content.Headers.ContentLength = requestAsByteArray.Length;
             return content;
         }
-        
+
         private string CreateJwtToken(string scopes)
         {
             var jwt = new JwtBuilder()
@@ -109,25 +98,17 @@ namespace Ks.Fiks.Maskinporten.Client
                       .Audience(_properties.Audience)
                       .Issuer(_properties.Issuer)
                       .IssuedAt(DateTime.Now)
-                      .ExpirationTime(DateTime.Now.AddMinutes(JWT_EXPIRE_TIME_IN_MINUTES))
-                      .AddClaim("Scope",scopes)
+                      .ExpirationTime(DateTime.Now.AddMinutes(JwtExpireTimeInMinutes))
+                      .AddClaim("Scope", scopes)
                       .Build();
 
             return jwt;
         }
-
 
         private async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
         {
             var responseAsJson = await responseMessage.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
         }
-
-        private void StoreAccessTokenInCache(string accessToken, string scopeKey)
-        {
-            _accessTokenCache.Add(scopeKey, accessToken);
-        }
-
-
     }
 }

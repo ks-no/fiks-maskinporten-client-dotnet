@@ -69,6 +69,25 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 ItExpr.IsAny<CancellationToken>()
             );
         }
+        
+        [Fact]
+        public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimit()
+        {
+            _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 1;
+            var sut = _fixture.CreateSut();
+
+            var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
+            await Task.Delay(TimeSpan.FromMilliseconds(1500));
+            var token2 = await sut.GetAccessToken(_fixture.DefaultScopes);
+
+            token1.Should().Be(token2);
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(2),
+                ItExpr.Is<HttpRequestMessage>(req => true),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
 
         [Fact]
         public async Task SendsGrantTypeInPost()
