@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using JWT;
@@ -21,11 +22,14 @@ namespace Ks.Fiks.Maskinporten.Client
 
         private MaskinportenClientProperties _properties;
         private HttpClient _httpClient;
+        private X509Certificate2 _certificate;
+       
         private Dictionary<string, string> _accessTokenCache;
 
-        public MaskinportenClient(MaskinportenClientProperties properties, HttpClient httpClient = null)
+        public MaskinportenClient(X509Certificate2 certificate, MaskinportenClientProperties properties,   HttpClient httpClient = null)
         {
             _properties = properties;
+            _certificate = certificate;
             _httpClient = httpClient ?? new HttpClient();
             _accessTokenCache = new Dictionary<string, string>();
         }
@@ -97,6 +101,20 @@ namespace Ks.Fiks.Maskinporten.Client
             content.Headers.ContentLength = requestAsByteArray.Length;
             return content;
         }
+        
+        private string CreateJwtToken(string scopes)
+        {
+            var jwt = new JwtBuilder()
+                      .WithAlgorithm(new RS256Algorithm(_certificate))
+                      .Audience(_properties.Audience)
+                      .Issuer(_properties.Issuer)
+                      .IssuedAt(DateTime.Now)
+                      .ExpirationTime(DateTime.Now.AddMinutes(JWT_EXPIRE_TIME_IN_MINUTES))
+                      .AddClaim("Scope",scopes)
+                      .Build();
+
+            return jwt;
+        }
 
 
         private async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
@@ -110,21 +128,6 @@ namespace Ks.Fiks.Maskinporten.Client
             _accessTokenCache.Add(scopeKey, accessToken);
         }
 
-        private string CreateJwtToken(string scopes)
-        {
-            const string secret = "GQDstcKsx0NHjPOuXOYg5MbeJ1XT0uFiwDVvVBrk";
 
-            var jwt = new JwtBuilder()
-                      .WithAlgorithm(new HMACSHA256Algorithm())
-                      .WithSecret(secret)
-                      .Audience(_properties.Audience)
-                      .Issuer(_properties.Issuer)
-                      .IssuedAt(DateTime.Now)
-                      .ExpirationTime(DateTime.Now.AddMinutes(JWT_EXPIRE_TIME_IN_MINUTES))
-                      .AddClaim("Scope",scopes)
-                      .Build();
-
-            return jwt;
-        }
     }
 }

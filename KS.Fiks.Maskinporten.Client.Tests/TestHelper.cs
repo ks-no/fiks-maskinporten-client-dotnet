@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using JWT;
+using JWT.Algorithms;
 using JWT.Serializers;
 using Newtonsoft.Json;
 
@@ -9,12 +11,26 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 {
     public static class TestHelper
     {
+        static TestHelper()
+        {
+            Certificate = new X509Certificate2("alice-virksomhetssertifikat.p12",
+                "PASSWORD");
+            
+            CertificateOtherThanUsedForDecode  = new X509Certificate2("bob-virksomhetssertifikat.p12",
+                "PASSWORD");
+
+        }
+        
         public static Dictionary<string, string> RequestContentAsDictionary(HttpRequestMessage request)
         {
             var json = request.Content.ReadAsStringAsync().Result;
             return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
 
+        public static X509Certificate2 Certificate { get; }
+        public static X509Certificate2 CertificateOtherThanUsedForDecode { get;  }
+
+        
         public static bool RequestContentIsJwt(HttpRequestMessage request, string jwtFieldName)
         {
             var content = RequestContentAsDictionary(request);
@@ -47,11 +63,12 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         private static string GetDeserializedJwt(string serializedJwt)
         {
+            var factory = new RSAlgorithmFactory(() =>Certificate);
             var serializer = new JsonNetSerializer();
             var validator = new JwtValidator(serializer, new UtcDateTimeProvider());
-            var encoder = new JwtBase64UrlEncoder();
-            var decoder = new JwtDecoder(serializer, validator, encoder);
-            return decoder.Decode(serializedJwt);
+            var urlEncoder = new JwtBase64UrlEncoder();
+            var decoder = new JwtDecoder(serializer, validator, urlEncoder, factory);
+            return decoder.Decode(serializedJwt,"MustBeNonNullButValueDoesNotMatterForRS256",true);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
@@ -13,6 +14,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
     {
         private string _accessToken;
         private HttpStatusCode _statusCode = HttpStatusCode.OK;
+        private bool _useIncorrectCertificate = false;
 
         public MaskinportenClientFixture()
         {
@@ -28,18 +30,29 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public MaskinportenClient CreateSut()
         {
             SetResponse();
-            return new MaskinportenClient(Properties, new HttpClient(HttpMessageHandleMock.Object));
+            return new MaskinportenClient(
+                _useIncorrectCertificate ? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate, 
+                Properties, 
+                new HttpClient(HttpMessageHandleMock.Object));
         }
 
-        public void SetAccessToken(string accessToken)
+        public MaskinportenClientFixture WithAccessToken(string accessToken)
         {
             _accessToken = accessToken;
+            return this;
         }
 
-        public void SetStatusCode(HttpStatusCode statusCode)
+        public MaskinportenClientFixture WithStatusCode(HttpStatusCode statusCode)
         {
             _statusCode = statusCode;
+            return this;
         }
+        
+        public MaskinportenClientFixture WithIncorrectCertificate()
+        {
+            _useIncorrectCertificate = true;
+            return this;
+        } 
 
         private void SetDefaultProperties()
         {

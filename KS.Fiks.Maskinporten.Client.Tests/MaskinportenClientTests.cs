@@ -25,8 +25,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task ReturnsAccessToken()
         {
             var expectedAccessToken = "kldsfh39psdjf239i32+u9f";
-            _fixture.SetAccessToken(expectedAccessToken);
-            var sut = _fixture.CreateSut();
+            var sut = _fixture.WithAccessToken(expectedAccessToken).CreateSut();
 
             var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes);
             accessToken.Should().Be(expectedAccessToken);
@@ -226,7 +225,25 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 ItExpr.IsAny<CancellationToken>()
             );
         }
-
+        
+        [Fact]
+        public async Task TestHelperThrowsExceptionIfIncorrectSignature()
+        {
+            var sut = _fixture.WithIncorrectCertificate().CreateSut();
+            
+            await sut.GetAccessToken(_fixture.DefaultScopes);
+            Assert.Throws<JWT.SignatureVerificationException>(() =>
+            {
+                _fixture.HttpMessageHandleMock.Protected().Verify(
+                    "SendAsync",
+                    Times.Exactly(1),
+                    ItExpr.Is<HttpRequestMessage>(req =>
+                        TestHelper.DeserializedFieldInJwt(req, "assertion", "aud") != "nothing"
+                    ),
+                    ItExpr.IsAny<CancellationToken>()
+                );
+            });
+        }
         
         [Fact]
         public async Task SendsHeaderCharsetUtf8()
@@ -306,8 +323,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [InlineData(HttpStatusCode.Forbidden)]
         public async Task ThrowsExceptionIfStatusCodeIsNot200(HttpStatusCode statusCode)
         {
-            _fixture.SetStatusCode(statusCode);
-            var sut = _fixture.CreateSut();
+            var sut = _fixture.WithStatusCode(statusCode).CreateSut();
 
 
             await Assert.ThrowsAsync<UnexpectedResponseException>(

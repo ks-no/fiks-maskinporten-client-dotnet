@@ -21,4 +21,10 @@
       <ProjectReference Include="..\KS.Fiks.Maskinporten.Client\KS.Fiks.Maskinporten.Client.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="*.p12">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>
