@@ -58,8 +58,9 @@ namespace Ks.Fiks.Maskinporten.Client
             var response = await _httpClient.PostAsync(_properties.TokenEndpoint, requestContent);
             if (response.StatusCode != HttpStatusCode.OK)
             {
+                var content = await response.Content.ReadAsStringAsync();
                 throw new UnexpectedResponseException(
-                    $"Got unexpected HTTP Status code {response.StatusCode} ({response.ReasonPhrase}) from {_properties.TokenEndpoint}");
+                    $"Got unexpected HTTP Status code {response.StatusCode} ({response.ReasonPhrase}) from {_properties.TokenEndpoint}. Content: {content}");
             }
 
             var maskinportenResponse = await ReadResponse(response);
@@ -77,16 +78,14 @@ namespace Ks.Fiks.Maskinporten.Client
 
         private ByteArrayContent CreateRequestContent(string scopes)
         {
-            var request = new MaskinportenRequest()
+ 
+            var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
             {
-                GrantType = GrantType,
-                Assertion = CreateJwtToken(scopes)
-            };
-            var requestAsJson = JsonConvert.SerializeObject(request);
-            var requestAsByteArray = Encoding.UTF8.GetBytes(requestAsJson);
-            var content = new ByteArrayContent(requestAsByteArray);
+                new KeyValuePair<string, string>("grant_type", GrantType),
+                new KeyValuePair<string, string>("assertion", CreateJwtToken(scopes))
+            });
+            
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            content.Headers.ContentLength = requestAsByteArray.Length;
             return content;
         }
 
