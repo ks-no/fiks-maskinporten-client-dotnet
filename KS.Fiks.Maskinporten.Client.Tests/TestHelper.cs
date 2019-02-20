@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Web;
 using JWT;
 using JWT.Algorithms;
 using JWT.Serializers;
@@ -23,8 +26,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         
         public static Dictionary<string, string> RequestContentAsDictionary(HttpRequestMessage request)
         {
-            var json = request.Content.ReadAsStringAsync().Result;
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            var formData = request.Content.ReadAsStringAsync().Result;
+            var query = HttpUtility.ParseQueryString(formData);
+            
+            return query.AllKeys.ToDictionary(t => t, t => query[t]);
         }
 
         public static X509Certificate2 Certificate { get; }
@@ -55,7 +60,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var content = RequestContentAsDictionary(request);
             var serializedJwt = content[jwtFieldName];
             var deserializedJwt = GetDeserializedJwt(serializedJwt);
-
 
             var jwtAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(deserializedJwt);
             return jwtAsDictionary[field];
