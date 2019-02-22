@@ -20,8 +20,8 @@ namespace Ks.Fiks.Maskinporten.Client
         private readonly MaskinportenClientProperties _properties;
         private readonly HttpClient _httpClient;
 
-        private readonly JwtRequestTokenGenerator _tokenGenerator;
-        private readonly JwtResponseDecoder _responseDecoder;
+        private readonly IJwtRequestTokenGenerator _tokenGenerator;
+        private readonly IJwtResponseDecoder _responseDecoder;
 
         private readonly ITokenCache<string> _tokenCache;
 

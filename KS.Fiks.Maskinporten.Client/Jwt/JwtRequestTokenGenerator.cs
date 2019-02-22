@@ -8,7 +8,7 @@ using JWT.Serializers;
 
 namespace Ks.Fiks.Maskinporten.Client.Jwt
 {
-    public class JwtRequestTokenGenerator
+    public class JwtRequestTokenGenerator : IJwtRequestTokenGenerator
     {
         private const int JwtExpireTimeInMinutes = 2;
         private const string DummyKey = ""; // Required by encoder, but not used with RS256Algorithm 

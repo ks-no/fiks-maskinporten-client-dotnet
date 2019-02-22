@@ -3,7 +3,7 @@ using JWT.Serializers;
 
 namespace Ks.Fiks.Maskinporten.Client.Jwt
 {
-    public class JwtResponseDecoder
+    public class JwtResponseDecoder : IJwtResponseDecoder
     {
         private readonly JwtDecoder _decoder;
         
