@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using JWT.Builder;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json.Linq;
@@ -89,8 +91,26 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private string GenerateJsonResponse()
         {
             dynamic response = new JObject();
-            response.expires_in = 1;
-            response.access_token = _accessToken;
+            response.Add("expires_in", 1);
+
+            var tokenResponse = new Dictionary<string, object>
+            {
+                {"aud", "test-aud"}, 
+                {"scope", "test-scope"},
+                {"iss", "https://test.no/oidc-provider/"},
+                {"token_type", "bearer"},
+                {"exp", 1550832858},
+                {"iat", 1550832828},
+                {"client_orgno", "987654321"},
+                {"jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY="}
+            };
+            var tokenHeader = new Dictionary<string, object>
+            {
+                {"kid", "mqT5A3LOSIHbpKrscb3EHGrr-WIFRfLdaqZ_5J9GR9s"}
+            };
+            var encodedToken = TestHelper.EncodeJwt(tokenHeader, tokenResponse);
+
+            response.Add("access_token", encodedToken);
             return response.ToString();
         }
     }

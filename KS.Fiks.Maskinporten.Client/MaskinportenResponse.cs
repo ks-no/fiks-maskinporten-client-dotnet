@@ -10,3 +10,4 @@ namespace Ks.Fiks.Maskinporten.Client
         [JsonProperty("access_token")] public string AccessToken { get; private set; }
     }
 }
+

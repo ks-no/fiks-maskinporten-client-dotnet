@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Web;
 using JWT;
 using JWT.Algorithms;
+using JWT.Builder;
 using JWT.Serializers;
 using Newtonsoft.Json;
 
@@ -15,34 +16,44 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 {
     public static class TestHelper
     {
+        private static readonly RSAlgorithmFactory _factory;
+        private static readonly JsonNetSerializer _serializer;
+        private static readonly JwtValidator _validator;
+        private static readonly JwtBase64UrlEncoder _urlEncoder;
+
+
         static TestHelper()
         {
             Certificate = new X509Certificate2("alice-virksomhetssertifikat.p12",
                 "PASSWORD");
-            
-            CertificateOtherThanUsedForDecode  = new X509Certificate2("bob-virksomhetssertifikat.p12",
+
+            CertificateOtherThanUsedForDecode = new X509Certificate2("bob-virksomhetssertifikat.p12",
                 "PASSWORD");
 
+            _factory = new RSAlgorithmFactory(() => Certificate);
+            _serializer = new JsonNetSerializer();
+            _validator = new JwtValidator(_serializer, new UtcDateTimeProvider());
+            _urlEncoder = new JwtBase64UrlEncoder();
         }
-        
+
         public static Dictionary<string, string> RequestContentAsDictionary(HttpRequestMessage request)
         {
             var formData = request.Content.ReadAsStringAsync().Result;
             var query = HttpUtility.ParseQueryString(formData);
-            
+
             return query.AllKeys.ToDictionary(t => t, t => query[t]);
         }
 
         public static X509Certificate2 Certificate { get; }
-        public static X509Certificate2 CertificateOtherThanUsedForDecode { get;  }
+        public static X509Certificate2 CertificateOtherThanUsedForDecode { get; }
 
-        
+
         public static bool RequestContentIsJwt(HttpRequestMessage request, string jwtFieldName)
         {
             var content = RequestContentAsDictionary(request);
             var serializedJwt = content[jwtFieldName];
 
-            
+
             try
             {
                 var decodedJwt = GetDeserializedJwt(serializedJwt);
@@ -53,13 +64,19 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 System.Console.WriteLine($"Could not decode: {ex.Message}");
                 return false;
             }
-
         }
 
         public static string DeserializedFieldInJwt(HttpRequestMessage request, string jwtFieldName, string field)
         {
             return DeserializedFieldInJwt<string>(request, jwtFieldName, field);
         }
+
+        public static string EncodeJwt(Dictionary<string, object> header, object payload)
+        {
+            var encoder = new JwtEncoder(_factory.Create(JwtHashAlgorithm.RS256), _serializer, _urlEncoder);
+            return encoder.Encode(header, payload, "password");
+        }
+
         public static T DeserializedFieldInJwt<T>(HttpRequestMessage request, string jwtFieldName, string field)
         {
             var content = RequestContentAsDictionary(request);
@@ -67,17 +84,13 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var deserializedJwt = GetDeserializedJwt(serializedJwt);
 
             var jwtAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(deserializedJwt);
-            return (T)jwtAsDictionary[field];
+            return (T) jwtAsDictionary[field];
         }
 
         private static string GetDeserializedJwt(string serializedJwt)
         {
-            var factory = new RSAlgorithmFactory(() =>Certificate);
-            var serializer = new JsonNetSerializer();
-            var validator = new JwtValidator(serializer, new UtcDateTimeProvider());
-            var urlEncoder = new JwtBase64UrlEncoder();
-            var decoder = new JwtDecoder(serializer, validator, urlEncoder, factory);
-            return decoder.Decode(serializedJwt,"MustBeNonNullButValueDoesNotMatterForRS256",true);
+            var decoder = new JwtDecoder(_serializer, _validator, _urlEncoder, _factory);
+            return decoder.Decode(serializedJwt, "MustBeNonNullButValueDoesNotMatterForRS256", true);
         }
     }
 }

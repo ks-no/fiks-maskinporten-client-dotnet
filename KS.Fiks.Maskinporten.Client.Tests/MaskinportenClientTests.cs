@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Moq.Protected;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 
@@ -22,13 +24,29 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         }
 
         [Fact]
-        public async Task ReturnsAccessToken()
+        public async Task ReturnsNonEmptyAccessToken()
         {
-            var expectedAccessToken = "kldsfh39psdjf239i32+u9f";
-            var sut = _fixture.WithAccessToken(expectedAccessToken).CreateSut();
+            var sut = _fixture.CreateSut();
 
             var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes);
-            accessToken.Should().Be(expectedAccessToken);
+            accessToken.Length.Should().BePositive();
+        }
+        
+        
+        [Theory]
+        [InlineData("exp")]
+        [InlineData("aud")]
+        [InlineData("jti")]
+        [InlineData("iss")]
+        [InlineData("client_orgno")]
+        public async Task ReturnsAccessTokenAsJsonWithExpectedField(string fieldname)
+        {
+            var sut = _fixture.CreateSut();
+
+            var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes);
+            var tokenAsJson = JObject.Parse(accessToken);
+
+            tokenAsJson.ContainsKey(fieldname).Should().BeTrue();
         }
 
         [Fact]
