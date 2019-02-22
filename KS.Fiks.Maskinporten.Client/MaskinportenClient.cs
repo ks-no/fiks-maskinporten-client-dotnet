@@ -57,7 +57,7 @@ namespace Ks.Fiks.Maskinporten.Client
         private async Task<string> GetNewAccessToken(string scopes)
         {
             SetRequestHeaders();
-            var requestContent = await CreateRequestContent(scopes);
+            var requestContent = CreateRequestContent(scopes);
 
             var response = await _httpClient.PostAsync(_properties.TokenEndpoint, requestContent);
             await ThrowIfResponseIsInvalid(response);
@@ -76,7 +76,7 @@ namespace Ks.Fiks.Maskinporten.Client
             };
         }
 
-        private async Task<ByteArrayContent> CreateRequestContent(string scopes)
+        private FormUrlEncodedContent CreateRequestContent(string scopes)
         {
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
             {
