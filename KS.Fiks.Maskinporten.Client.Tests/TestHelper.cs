@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
@@ -57,12 +58,16 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         public static string DeserializedFieldInJwt(HttpRequestMessage request, string jwtFieldName, string field)
         {
+            return DeserializedFieldInJwt<string>(request, jwtFieldName, field);
+        }
+        public static T DeserializedFieldInJwt<T>(HttpRequestMessage request, string jwtFieldName, string field)
+        {
             var content = RequestContentAsDictionary(request);
             var serializedJwt = content[jwtFieldName];
             var deserializedJwt = GetDeserializedJwt(serializedJwt);
 
-            var jwtAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(deserializedJwt);
-            return jwtAsDictionary[field];
+            var jwtAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(deserializedJwt);
+            return (T)jwtAsDictionary[field];
         }
 
         private static string GetDeserializedJwt(string serializedJwt)

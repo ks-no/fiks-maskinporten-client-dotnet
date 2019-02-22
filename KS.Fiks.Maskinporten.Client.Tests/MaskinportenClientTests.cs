@@ -198,7 +198,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 "SendAsync",
                 Times.Exactly(1),
                 ItExpr.Is<HttpRequestMessage>(req =>
-                    TestHelper.DeserializedFieldInJwt(req,"assertion", "Scope") == expectedScopeAsString
+                    TestHelper.DeserializedFieldInJwt(req,"assertion", "scope") == expectedScopeAsString
                 ),
                 ItExpr.IsAny<CancellationToken>()
             );
@@ -217,8 +217,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 "SendAsync",
                 Times.Exactly(1),
                 ItExpr.Is<HttpRequestMessage>(req =>
-                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "iat")) <= now + 1 &&
-                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "iat")) >= now - 1 
+                    TestHelper.DeserializedFieldInJwt<double>(req,"assertion", "iat") <= now + 1 &&
+                    TestHelper.DeserializedFieldInJwt<double>(req,"assertion", "iat") >= now - 1 
 
                 ),
                 ItExpr.IsAny<CancellationToken>()
@@ -237,8 +237,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 "SendAsync",
                 Times.Exactly(1),
                 ItExpr.Is<HttpRequestMessage>(req =>
-                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "exp")) <= expectedExpiredTime + 1 &&
-                    long.Parse(TestHelper.DeserializedFieldInJwt(req,"assertion", "exp")) >= expectedExpiredTime - 1 
+                    TestHelper.DeserializedFieldInJwt<double>(req,"assertion", "exp") <= expectedExpiredTime + 1 &&
+                    TestHelper.DeserializedFieldInJwt<double>(req,"assertion", "exp") >= expectedExpiredTime - 1 
 
                 ),
                 ItExpr.IsAny<CancellationToken>()
@@ -275,7 +275,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 "SendAsync",
                 Times.Exactly(1),
                 ItExpr.Is<HttpRequestMessage>(req =>
-                    req.Headers.GetValues("Charset").Contains("utf-8")
+                    req.Content.Headers.GetValues("Charset").Contains("utf-8")
                 ),
                 ItExpr.IsAny<CancellationToken>()
             );
@@ -332,6 +332,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 ItExpr.IsAny<CancellationToken>()
             );
         }
+
 
         [Theory]
         [InlineData(HttpStatusCode.NotFound)]
