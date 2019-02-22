@@ -72,7 +72,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public async Task DoesNotSendRequestTwiceIfSecondCallIsWithinTimelimit()
         {
-            _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 1000;
             var sut = _fixture.CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
@@ -91,11 +90,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimit()
         {
-            _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 1;
-            var sut = _fixture.CreateSut();
+            var sut = _fixture.WithExpirationTime(TimeSpan.FromMilliseconds(10)).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
-            await Task.Delay(TimeSpan.FromMilliseconds(1500));
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
             var token2 = await sut.GetAccessToken(_fixture.DefaultScopes);
 
             token1.Should().Be(token2);
@@ -107,6 +105,45 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             );
         }
 
+        [Fact]
+        public async Task DoesNotSendRequestTwiceIfSecondCallIsWithinTimelimitGivenNumberOfSecondsLeftBeforeExpire()
+        {
+            _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 8;
+            var sut = _fixture.WithExpirationTime(TimeSpan.FromSeconds(10)).CreateSut();
+
+            var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            var token2 = await sut.GetAccessToken(_fixture.DefaultScopes);
+
+            token1.Should().Be(token2);
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req => true),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+        
+        [Fact]
+        public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimitGivenNumberOfSecondsLeftBeforeExpire()
+        {
+            _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 1;
+            var expirationTimespan = TimeSpan.FromSeconds(1) + TimeSpan.FromMilliseconds(10);
+            var sut = _fixture.WithExpirationTime(expirationTimespan).CreateSut();
+
+            var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            var token2 = await sut.GetAccessToken(_fixture.DefaultScopes);
+
+            token1.Should().Be(token2);
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(2),
+                ItExpr.Is<HttpRequestMessage>(req => true),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+        
         [Fact]
         public async Task SendsGrantTypeInPost()
         {

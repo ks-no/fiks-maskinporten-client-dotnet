@@ -4,20 +4,20 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 {
     public class TimedCacheEntry<T>
     {
-        private DateTime _createdTime;
+        private readonly DateTime _expirationTime;
 
         public T Value { get; }
 
         
-        public TimedCacheEntry(T value)
+        public TimedCacheEntry(T value, TimeSpan expirationDuration)
         {
             Value = value;
-            _createdTime = DateTime.Now;
+            _expirationTime = DateTime.Now + expirationDuration;
         }
 
-        public bool IsExpired(TimeSpan expirationTime)
+        public bool IsExpired()
         {
-            return DateTime.Now - _createdTime > expirationTime;
+            return DateTime.Now > _expirationTime;
         }
     }
 }

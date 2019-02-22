@@ -45,7 +45,8 @@ namespace Ks.Fiks.Maskinporten.Client
 
         public async Task<string> GetAccessToken(string scopes)
         {
-            return await _tokenCache.GetToken(scopes, async () => await GetNewAccessToken(scopes));
+            return await _tokenCache.GetToken(scopes, async () => await GetNewAccessToken(scopes),
+                CalculateTokenLifetime);
         }
 
         private string ScopesAsString(IEnumerable<string> scopes)
@@ -93,6 +94,24 @@ namespace Ks.Fiks.Maskinporten.Client
         {
             var responseAsJson = await responseMessage.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
+        }
+
+        private TimeSpan CalculateTokenLifetime(string tokenAsJson)
+        {
+            var tokenAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(tokenAsJson);
+            if (!tokenAsDictionary.ContainsKey("exp"))
+            {
+                throw new ArgumentException("tokenAsJson does not contain field 'exp'");
+            }
+
+            var expirationTimeInUtcSeconds = (Int64) tokenAsDictionary["exp"];
+            var expirationTime =
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(expirationTimeInUtcSeconds);
+
+            var tokenLifetime = expirationTime - DateTime.UtcNow -
+                                TimeSpan.FromSeconds(_properties.NumberOfSecondsLeftBeforeExpire);
+
+            return tokenLifetime;
         }
 
         private async Task ThrowIfResponseIsInvalid(HttpResponseMessage response)

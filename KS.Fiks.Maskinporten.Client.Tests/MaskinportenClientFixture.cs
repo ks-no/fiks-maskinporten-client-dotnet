@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using JWT;
 using JWT.Builder;
 using Moq;
 using Moq.Protected;
@@ -17,6 +19,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private string _accessToken;
         private HttpStatusCode _statusCode = HttpStatusCode.OK;
         private bool _useIncorrectCertificate = false;
+        private Int64 _expirationTime;
 
         public MaskinportenClientFixture()
         {
@@ -54,7 +57,15 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         {
             _useIncorrectCertificate = true;
             return this;
-        } 
+        }
+
+        public MaskinportenClientFixture WithExpirationTime(TimeSpan expirationTimeFromNow)
+        {
+            var newExpirationTime = UnixEpoch.GetSecondsSince(DateTime.UtcNow.Add(expirationTimeFromNow));
+            _expirationTime = Convert.ToInt64(newExpirationTime);
+
+            return this;
+        }
 
         private void SetDefaultProperties()
         {
@@ -65,6 +76,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         {
             SetDefaultProperties();
             _accessToken = "token";
+            var newExpirationTime = UnixEpoch.GetSecondsSince(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(10));
+            _expirationTime = Convert.ToInt64(newExpirationTime);
         }
 
         private void SetResponse()
@@ -86,7 +99,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 .ReturnsAsync(responseMessage)
                 .Verifiable();
         }
-
+        
+        
 
         private string GenerateJsonResponse()
         {
@@ -99,7 +113,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 {"scope", "test-scope"},
                 {"iss", "https://test.no/oidc-provider/"},
                 {"token_type", "bearer"},
-                {"exp", 1550832858},
+                {"exp",  _expirationTime},
                 {"iat", 1550832828},
                 {"client_orgno", "987654321"},
                 {"jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY="}
