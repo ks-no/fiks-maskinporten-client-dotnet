@@ -21,39 +21,11 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
 
             var expectedValue = "a value";
 
-            var actualValue = await sut.GetToken("key", () => Task.FromResult(expectedValue));
+            var actualValue = await sut.GetToken("key", () => Task.FromResult(expectedValue), (x) => TimeSpan.FromSeconds(100));
 
             actualValue.Should().Be(expectedValue);
         }
 
-        [Fact]
-        public async Task ReturnsValueFromCacheInSecondCallIfWithinTimeLimit()
-        {
-            var sut = _fixture.WithExpirationTime(TimeSpan.FromMinutes(1)).CreateSut();
-
-            var expectedValue = "a value";
-
-            var firstValue = await sut.GetToken("key", () => Task.FromResult(expectedValue));
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
-            var secondValue = await sut.GetToken("key", () => Task.FromResult("should not get"));
-
-            secondValue.Should().Be(expectedValue);
-        }
-
-        [Fact]
-        public async Task ReturnsNewValueIfCallIsOutsideTimeLimit()
-        {
-            var sut = _fixture.WithExpirationTime(TimeSpan.FromMilliseconds(10)).CreateSut();
-
-            var expectedValue = "a value";
-
-            var firstValue = await sut.GetToken("key", () => Task.FromResult("should not get"));
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
-            var secondValue = await sut.GetToken("key", () => Task.FromResult(expectedValue));
-
-            secondValue.Should().Be(expectedValue);
-        }
-        
         [Fact]
         public async Task ReturnsValueFromCacheInSecondCallIfWithinTokenTimeLimit()
         {
@@ -61,9 +33,11 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
 
             var expectedValue = "a value";
 
-            var firstValue = await sut.GetToken("key", () => Task.FromResult(expectedValue), (x) => TimeSpan.FromMinutes(10));
+            var firstValue = await sut.GetToken("key", () => Task.FromResult(expectedValue),
+                (x) => TimeSpan.FromMinutes(10));
             await Task.Delay(TimeSpan.FromMilliseconds(100));
-            var secondValue = await sut.GetToken("key", () => Task.FromResult("should not get"), (x) => TimeSpan.FromMinutes(10));
+            var secondValue = await sut.GetToken("key", () => Task.FromResult("should not get"),
+                (x) => TimeSpan.FromMinutes(10));
 
             secondValue.Should().Be(expectedValue);
         }
@@ -75,10 +49,13 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
 
             var expectedValue = "a value";
 
-            var firstValue = await sut.GetToken("key", () => Task.FromResult("should not get"), (x) => TimeSpan.FromMilliseconds(10));
+            var firstValue = await sut.GetToken("key", () => Task.FromResult("should not get"),
+                (x) => TimeSpan.FromMilliseconds(10));
             await Task.Delay(TimeSpan.FromMilliseconds(100));
-            var secondValue = await sut.GetToken("key", () => Task.FromResult(expectedValue), (x) => TimeSpan.FromMilliseconds(10));
+            var secondValue = await sut.GetToken("key", () => Task.FromResult(expectedValue),
+                (x) => TimeSpan.FromMilliseconds(10));
 
             secondValue.Should().Be(expectedValue);
-        }    }
+        }
+    }
 }

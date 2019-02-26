@@ -5,9 +5,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using JWT;
 using Moq;
 using Moq.Protected;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -24,29 +24,29 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         }
 
         [Fact]
-        public async Task ReturnsNonEmptyAccessToken()
+        public async Task ReturnsAccessToken()
         {
             var sut = _fixture.CreateSut();
 
             var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes);
-            accessToken.Length.Should().BePositive();
+            accessToken.Should().BeOfType<MaskinportenToken>();
         }
         
         
-        [Theory]
-        [InlineData("exp")]
-        [InlineData("aud")]
-        [InlineData("jti")]
-        [InlineData("iss")]
-        [InlineData("client_orgno")]
-        public async Task ReturnsAccessTokenAsJsonWithExpectedField(string fieldname)
+        [Fact]
+        public async Task ReturnsAccesstokenWithNonemptyFields()
         {
             var sut = _fixture.CreateSut();
 
             var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes);
-            var tokenAsJson = JObject.Parse(accessToken);
 
-            tokenAsJson.ContainsKey(fieldname).Should().BeTrue();
+            accessToken.Issuer.Should().NotBeEmpty();
+            accessToken.Audience.Should().NotBeEmpty();
+            accessToken.Scope.Should().NotBeEmpty();
+            accessToken.JwtId.Should().NotBeEmpty();
+            accessToken.ClientOrgno.Should().NotBeEmpty();
+            accessToken.ExpirationTime.Should().BeAfter(UnixEpoch.Value);
+            accessToken.IssuedAt.Should().BeAfter(UnixEpoch.Value);
         }
 
         [Fact]

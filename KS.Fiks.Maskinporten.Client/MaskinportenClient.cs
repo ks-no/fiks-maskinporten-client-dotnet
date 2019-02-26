@@ -5,8 +5,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using JWT;
-using JWT.Serializers;
 using Ks.Fiks.Maskinporten.Client.Cache;
 using Ks.Fiks.Maskinporten.Client.Jwt;
 using Newtonsoft.Json;
@@ -32,21 +30,22 @@ namespace Ks.Fiks.Maskinporten.Client
         {
             _properties = properties;
             _httpClient = httpClient ?? new HttpClient();
-            _tokenCache = new TokenCache<string>(TimeSpan.FromSeconds(_properties.NumberOfSecondsLeftBeforeExpire));
+            _tokenCache = new TokenCache<string>();
             _tokenGenerator = new JwtRequestTokenGenerator(certificate);
             _responseDecoder = new JwtResponseDecoder();
         }
 
-        public async Task<string> GetAccessToken(IEnumerable<string> scopes)
+        public async Task<MaskinportenToken> GetAccessToken(IEnumerable<string> scopes)
         {
             var scopesAsString = ScopesAsString(scopes);
             return await GetAccessToken(scopesAsString);
         }
 
-        public async Task<string> GetAccessToken(string scopes)
+        public async Task<MaskinportenToken> GetAccessToken(string scopes)
         {
-            return await _tokenCache.GetToken(scopes, async () => await GetNewAccessToken(scopes),
+            var tokenAsString = await _tokenCache.GetToken(scopes, async () => await GetNewAccessToken(scopes),
                 CalculateTokenLifetime);
+            return MaskinportenToken.CreateFromJsonString(tokenAsString);
         }
 
         private string ScopesAsString(IEnumerable<string> scopes)
@@ -104,9 +103,9 @@ namespace Ks.Fiks.Maskinporten.Client
                 throw new ArgumentException("tokenAsJson does not contain field 'exp'");
             }
 
-            var expirationTimeInUtcSeconds = (Int64) tokenAsDictionary["exp"];
+            var expirationTimeInUtcSeconds = (long) tokenAsDictionary["exp"];
             var expirationTime =
-                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(expirationTimeInUtcSeconds);
+                DateTime.UnixEpoch.AddSeconds(expirationTimeInUtcSeconds);
 
             var tokenLifetime = expirationTime - DateTime.UtcNow -
                                 TimeSpan.FromSeconds(_properties.NumberOfSecondsLeftBeforeExpire);

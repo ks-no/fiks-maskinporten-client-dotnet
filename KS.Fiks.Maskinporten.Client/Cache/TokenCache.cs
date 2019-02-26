@@ -10,22 +10,19 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
     {
         private const int DefaultFactoryTimeoutInSeconds = 7;
         
-        private readonly TimeSpan _defaultExpirationTime;
         private readonly Dictionary<string, TimedCacheEntry<T>> _cacheDictionary;
         private readonly SemaphoreSlim _mutex;
         
 
-        public TokenCache(TimeSpan defaultExpirationTime)
+        public TokenCache()
         {
-            _defaultExpirationTime = defaultExpirationTime;
             _cacheDictionary = new Dictionary<string, TimedCacheEntry<T>>();
             _mutex = new SemaphoreSlim(1 );
 
         }
 
-        public async Task<T> GetToken(string tokenKey, Func<Task<T>> tokenFactory, Func<T, TimeSpan> entryExpirationTime = null)
+        public async Task<T> GetToken(string tokenKey, Func<Task<T>> tokenFactory, Func<T, TimeSpan> entryExpirationTime)
         {
-            entryExpirationTime = entryExpirationTime ?? ((x) => _defaultExpirationTime);
             await _mutex.WaitAsync();
             try
             {

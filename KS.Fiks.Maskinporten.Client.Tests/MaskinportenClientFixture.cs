@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using JWT;
-using JWT.Builder;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json.Linq;
