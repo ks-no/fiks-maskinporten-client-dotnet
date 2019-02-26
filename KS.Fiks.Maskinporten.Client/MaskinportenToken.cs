@@ -6,29 +6,39 @@ namespace Ks.Fiks.Maskinporten.Client
 {
     public class MaskinportenToken
     {
-        private string _rawJson;
+        private readonly string _rawJson;
 
-        public string Audience { get; private set; }
+        public string Audience { get; }
 
-        public string Scope { get; private set; }
+        public string Scope { get; }
 
-        public string Issuer { get; private set; }
+        public string Issuer { get; }
 
-        public string TokenType { get; private set; }
+        public string TokenType { get; }
 
-        public DateTime ExpirationTime { get; private set; }
+        public DateTime ExpirationTime { get; }
 
-        public DateTime IssuedAt { get; private set; }
+        public DateTime IssuedAt { get; }
 
-        public string ClientOrgno { get; private set; }
+        public string ClientOrgno { get; }
 
-        public string JwtId { get; private set; }
+        public string JwtId { get; }
 
 
         private MaskinportenToken(string rawJson)
         {
             _rawJson = rawJson;
-            SetValuesFromJson();
+            var json = JObject.Parse(_rawJson);
+
+            Audience = GetStringValueFromJson(json, "aud");
+            Scope = GetStringValueFromJson(json, "scope");
+            Issuer = GetStringValueFromJson(json, "iss");
+            TokenType = GetStringValueFromJson(json, "token_type");
+
+            ExpirationTime = GetDateTimeFromJson(json, "exp");
+            IssuedAt = GetDateTimeFromJson(json, "iat");
+            JwtId = GetStringValueFromJson(json, "jti");
+            ClientOrgno = GetStringValueFromJson(json, "client_orgno");
         }
 
         public string AsJsonString()
@@ -44,15 +54,32 @@ namespace Ks.Fiks.Maskinporten.Client
             }
             else
             {
-                var other = (MaskinportenToken) obj;
-                return other.Audience == Audience
-                       && other.Scope == Scope
-                       && other.Issuer == Issuer
-                       && other.TokenType == TokenType
-                       && other.ExpirationTime == ExpirationTime
-                       && other.IssuedAt == IssuedAt
-                       && other.ClientOrgno == ClientOrgno
-                       && other.JwtId == JwtId;
+                return this.Equals((MaskinportenToken) obj)
+            }
+        }
+
+        protected bool Equals(MaskinportenToken other)
+        {
+            return string.Equals(Audience, other.Audience) &&
+                   string.Equals(Scope, other.Scope) && string.Equals(Issuer, other.Issuer) &&
+                   string.Equals(TokenType, other.TokenType) && ExpirationTime.Equals(other.ExpirationTime) &&
+                   IssuedAt.Equals(other.IssuedAt) && string.Equals(ClientOrgno, other.ClientOrgno) &&
+                   string.Equals(JwtId, other.JwtId);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (Audience != null ? Audience.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Scope != null ? Scope.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Issuer != null ? Issuer.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (TokenType != null ? TokenType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ ExpirationTime.GetHashCode();
+                hashCode = (hashCode * 397) ^ IssuedAt.GetHashCode();
+                hashCode = (hashCode * 397) ^ (ClientOrgno != null ? ClientOrgno.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (JwtId != null ? JwtId.GetHashCode() : 0);
+                return hashCode;
             }
         }
 
@@ -63,17 +90,6 @@ namespace Ks.Fiks.Maskinporten.Client
 
         private void SetValuesFromJson()
         {
-            var json = JObject.Parse(_rawJson);
-
-            Audience = GetStringValueFromJson(json, "aud");
-            Scope = GetStringValueFromJson(json, "scope");
-            Issuer = GetStringValueFromJson(json, "iss");
-            TokenType = GetStringValueFromJson(json, "token_type");
-
-            ExpirationTime = GetDateTimeFromJson(json, "exp");
-            IssuedAt = GetDateTimeFromJson(json, "iat");
-            JwtId = GetStringValueFromJson(json, "jti");
-            ClientOrgno = GetStringValueFromJson(json, "client_orgno");
         }
 
         private static string GetStringValueFromJson(JObject json, string field)
