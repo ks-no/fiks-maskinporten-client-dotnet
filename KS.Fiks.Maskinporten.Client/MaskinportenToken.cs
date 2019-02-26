@@ -48,14 +48,7 @@ namespace Ks.Fiks.Maskinporten.Client
 
         public override bool Equals(object obj)
         {
-            if (obj.GetType() != this.GetType())
-            {
-                return false;
-            }
-            else
-            {
-                return this.Equals((MaskinportenToken) obj)
-            }
+            return obj.GetType() == GetType() && Equals((MaskinportenToken) obj);
         }
 
         protected bool Equals(MaskinportenToken other)
