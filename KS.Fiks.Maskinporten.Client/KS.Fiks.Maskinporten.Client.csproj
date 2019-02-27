@@ -4,10 +4,12 @@
         <TargetFramework>netcoreapp2.2</TargetFramework>
         <RootNamespace>KS.Fiks.Maskinporten.Client</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
-    <PropertyGroup>
         <PackageId>MaskinportenClient</PackageId>
-        <VersionPrefix>0.0.4</VersionPrefix>
+        <Version>0.0.4</Version>
+        <Authors>KS DotNet Team</Authors>
+        <Copyright>© KS 2019</Copyright>
+        <Title>Library for integration with DIFI Maskinporten</Title>
+
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="JWT" Version="4.0.0" />
