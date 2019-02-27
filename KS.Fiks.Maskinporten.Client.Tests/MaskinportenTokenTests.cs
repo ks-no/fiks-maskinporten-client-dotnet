@@ -20,7 +20,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             ""jti"": ""ifFO_xAYGepbtUxZhUcESoNkewGG6v15sfCWGPm_MUI=""
             }";
 
-            var token = MaskinportenToken.CreateFromJsonString(maskinportenTokenAsJsonString);
+            var token = MaskinportenToken.CreateFromJsonString(maskinportenTokenAsJsonString, 120);
             
             token.Audience.Should().Be("oidc_ks_test");
             token.Scope.Should().Be("ks");

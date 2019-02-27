@@ -8,33 +8,28 @@ namespace Ks.Fiks.Maskinporten.Client
     {
         private readonly string _rawJson;
 
+        private readonly DateTime _requestNewTokenAfterTime;
+
         public string Audience { get; }
-
         public string Scope { get; }
-
         public string Issuer { get; }
-
         public string TokenType { get; }
-
         public DateTime ExpirationTime { get; }
-
         public DateTime IssuedAt { get; }
-
         public string ClientOrgno { get; }
-
         public string JwtId { get; }
 
 
-        private MaskinportenToken(string rawJson)
+        private MaskinportenToken(string rawJson, int expiresIn)
         {
+            _requestNewTokenAfterTime = DateTime.UtcNow.AddSeconds(expiresIn);
+
             _rawJson = rawJson;
             var json = JObject.Parse(_rawJson);
-
             Audience = GetStringValueFromJson(json, "aud");
             Scope = GetStringValueFromJson(json, "scope");
             Issuer = GetStringValueFromJson(json, "iss");
             TokenType = GetStringValueFromJson(json, "token_type");
-
             ExpirationTime = GetDateTimeFromJson(json, "exp");
             IssuedAt = GetDateTimeFromJson(json, "iat");
             JwtId = GetStringValueFromJson(json, "jti");
@@ -51,14 +46,11 @@ namespace Ks.Fiks.Maskinporten.Client
             return obj.GetType() == GetType() && Equals((MaskinportenToken) obj);
         }
 
-        protected bool Equals(MaskinportenToken other)
+        public bool IsExpiring()
         {
-            return string.Equals(Audience, other.Audience) &&
-                   string.Equals(Scope, other.Scope) && string.Equals(Issuer, other.Issuer) &&
-                   string.Equals(TokenType, other.TokenType) && ExpirationTime.Equals(other.ExpirationTime) &&
-                   IssuedAt.Equals(other.IssuedAt) && string.Equals(ClientOrgno, other.ClientOrgno) &&
-                   string.Equals(JwtId, other.JwtId);
+            return _requestNewTokenAfterTime < DateTime.UtcNow;
         }
+
 
         public override int GetHashCode()
         {
@@ -76,13 +68,21 @@ namespace Ks.Fiks.Maskinporten.Client
             }
         }
 
-        public static MaskinportenToken CreateFromJsonString(string rawJson)
+        public static MaskinportenToken CreateFromJsonString(string rawJson, int expiresIn)
         {
-            return new MaskinportenToken(rawJson);
+            return new MaskinportenToken(rawJson, expiresIn);
         }
 
-        private void SetValuesFromJson()
+        protected bool Equals(MaskinportenToken other)
         {
+            return string.Equals(Audience, other.Audience) &&
+                   string.Equals(Scope, other.Scope) &&
+                   string.Equals(Issuer, other.Issuer) &&
+                   string.Equals(TokenType, other.TokenType) &&
+                   ExpirationTime.Equals(other.ExpirationTime) &&
+                   IssuedAt.Equals(other.IssuedAt) &&
+                   string.Equals(ClientOrgno, other.ClientOrgno) &&
+                   string.Equals(JwtId, other.JwtId);
         }
 
         private static string GetStringValueFromJson(JObject json, string field)

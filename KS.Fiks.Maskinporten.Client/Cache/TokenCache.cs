@@ -6,29 +6,26 @@ using System.Threading.Tasks;
 
 namespace Ks.Fiks.Maskinporten.Client.Cache
 {
-    public class TokenCache<T> : ITokenCache<T>, IDisposable
+    public class TokenCache : ITokenCache, IDisposable
     {
-        private const int DefaultFactoryTimeoutInSeconds = 7;
-        
-        private readonly Dictionary<string, TimedCacheEntry<T>> _cacheDictionary;
+        private readonly Dictionary<string, MaskinportenToken> _cacheDictionary;
         private readonly SemaphoreSlim _mutex;
-        
+
 
         public TokenCache()
         {
-            _cacheDictionary = new Dictionary<string, TimedCacheEntry<T>>();
-            _mutex = new SemaphoreSlim(1 );
-
+            _cacheDictionary = new Dictionary<string, MaskinportenToken>();
+            _mutex = new SemaphoreSlim(1);
         }
 
-        public async Task<T> GetToken(string tokenKey, Func<Task<T>> tokenFactory, Func<T, TimeSpan> entryExpirationTime)
+        public async Task<MaskinportenToken> GetToken(string tokenKey, Func<Task<MaskinportenToken>> tokenFactory)
         {
             await _mutex.WaitAsync();
             try
             {
                 return HasValidEntry(tokenKey)
-                    ? _cacheDictionary[tokenKey].Value
-                    : await UpdateOrAddToken(tokenKey, tokenFactory, entryExpirationTime);
+                    ? _cacheDictionary[tokenKey]
+                    : await UpdateOrAddToken(tokenKey, tokenFactory);
             }
             finally
             {
@@ -43,25 +40,24 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
                 return false;
             }
 
-            return !_cacheDictionary[tokenKey].IsExpired();
+            return !_cacheDictionary[tokenKey].IsExpiring();
         }
 
-        private async Task<T> UpdateOrAddToken(string tokenKey, Func<Task<T>> tokenFactory, Func<T, TimeSpan> entryExpirationTime)
+        private async Task<MaskinportenToken> UpdateOrAddToken(string tokenKey,
+            Func<Task<MaskinportenToken>> tokenFactory)
         {
             var newToken = await tokenFactory();
-            var newEntry = new TimedCacheEntry<T>(newToken, entryExpirationTime(newToken));
             if (_cacheDictionary.ContainsKey(tokenKey))
             {
-                _cacheDictionary[tokenKey] = newEntry;
+                _cacheDictionary[tokenKey] = newToken;
             }
             else
             {
-                _cacheDictionary.Add(tokenKey, newEntry);
+                _cacheDictionary.Add(tokenKey, newToken);
             }
 
             return newToken;
         }
-
 
         public void Dispose()
         {

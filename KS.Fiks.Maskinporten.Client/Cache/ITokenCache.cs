@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace Ks.Fiks.Maskinporten.Client.Cache
 {
-    public interface ITokenCache<T>
+    public interface ITokenCache
     {
-        Task<T> GetToken(string tokenKey, Func<Task<T>> tokenGetter, Func<T, TimeSpan> entryExpirationTime );
+        Task<MaskinportenToken> GetToken(string tokenKey, Func<Task<MaskinportenToken>> tokenGetter);
     }
 }

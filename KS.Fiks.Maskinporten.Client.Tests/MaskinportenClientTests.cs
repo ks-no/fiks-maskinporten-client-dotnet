@@ -90,10 +90,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimit()
         {
-            var sut = _fixture.WithExpirationTime(TimeSpan.FromMilliseconds(10)).CreateSut();
+            var sut = _fixture.WithIdportenExpirationDuration(1).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            await Task.Delay(TimeSpan.FromMilliseconds(1100));
             var token2 = await sut.GetAccessToken(_fixture.DefaultScopes);
 
             token1.Should().Be(token2);
@@ -109,7 +109,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task DoesNotSendRequestTwiceIfSecondCallIsWithinTimelimitGivenNumberOfSecondsLeftBeforeExpire()
         {
             _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 8;
-            var sut = _fixture.WithExpirationTime(TimeSpan.FromSeconds(10)).CreateSut();
+            var sut = _fixture.WithIdportenExpirationDuration(10).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
             await Task.Delay(TimeSpan.FromMilliseconds(100));
@@ -128,11 +128,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimitGivenNumberOfSecondsLeftBeforeExpire()
         {
             _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 1;
-            var expirationTimespan = TimeSpan.FromSeconds(1) + TimeSpan.FromMilliseconds(10);
-            var sut = _fixture.WithExpirationTime(expirationTimespan).CreateSut();
+            var sut = _fixture.WithIdportenExpirationDuration(2).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes);
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            await Task.Delay(TimeSpan.FromMilliseconds(1100));
             var token2 = await sut.GetAccessToken(_fixture.DefaultScopes);
 
             token1.Should().Be(token2);
@@ -266,7 +265,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var sut = _fixture.CreateSut();
             
             await sut.GetAccessToken(_fixture.DefaultScopes);
-            var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             _fixture.HttpMessageHandleMock.Protected().Verify(
                 "SendAsync",
@@ -286,7 +285,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var sut = _fixture.CreateSut();
             
             await sut.GetAccessToken(_fixture.DefaultScopes);
-            var expectedExpiredTime = DateTimeOffset.Now.AddMinutes(2).ToUnixTimeSeconds();
+            var expectedExpiredTime = DateTimeOffset.UtcNow.AddMinutes(2).ToUnixTimeSeconds();
 
             _fixture.HttpMessageHandleMock.Protected().Verify(
                 "SendAsync",

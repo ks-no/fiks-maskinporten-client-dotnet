@@ -21,7 +21,7 @@ namespace Ks.Fiks.Maskinporten.Client
         private readonly IJwtRequestTokenGenerator _tokenGenerator;
         private readonly IJwtResponseDecoder _responseDecoder;
 
-        private readonly ITokenCache<MaskinportenToken> _tokenCache;
+        private readonly ITokenCache _tokenCache;
 
         public MaskinportenClient(
             X509Certificate2 certificate,
@@ -30,7 +30,7 @@ namespace Ks.Fiks.Maskinporten.Client
         {
             _properties = properties;
             _httpClient = httpClient ?? new HttpClient();
-            _tokenCache = new TokenCache<MaskinportenToken>();
+            _tokenCache = new TokenCache();
             _tokenGenerator = new JwtRequestTokenGenerator(certificate);
             _responseDecoder = new JwtResponseDecoder();
         }
@@ -44,9 +44,8 @@ namespace Ks.Fiks.Maskinporten.Client
         public async Task<MaskinportenToken> GetAccessToken(string scopes)
         {
             return await _tokenCache.GetToken(
-                scopes, 
-                async () => await GetNewAccessToken(scopes),
-                CalculateTokenLifetime);
+                scopes,
+                async () => await GetNewAccessToken(scopes));
         }
 
         private string ScopesAsString(IEnumerable<string> scopes)
@@ -60,12 +59,10 @@ namespace Ks.Fiks.Maskinporten.Client
             var requestContent = CreateRequestContent(scopes);
 
             var response = await _httpClient.PostAsync(_properties.TokenEndpoint, requestContent);
+
             await ThrowIfResponseIsInvalid(response);
 
-            var maskinportenResponse = await ReadResponse(response);
-            var accessTokenAsJwt = maskinportenResponse.AccessToken;
-            var accessTokenAsString = _responseDecoder.JwtAsString(accessTokenAsJwt);
-            return MaskinportenToken.CreateFromJsonString(accessTokenAsString);
+            return await CreateTokenFromResponse(response);
         }
 
         private void SetRequestHeaders()
@@ -75,7 +72,7 @@ namespace Ks.Fiks.Maskinporten.Client
                 NoCache = true
             };
         }
-
+        
         private FormUrlEncodedContent CreateRequestContent(string scopes)
         {
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
@@ -89,21 +86,7 @@ namespace Ks.Fiks.Maskinporten.Client
 
             return content;
         }
-
-        private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
-        {
-            var responseAsJson = await responseMessage.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
-        }
-
-        private TimeSpan CalculateTokenLifetime(MaskinportenToken token)
-        {
-            var tokenLifetime = token.ExpirationTime - DateTime.UtcNow -
-                                TimeSpan.FromSeconds(_properties.NumberOfSecondsLeftBeforeExpire);
-
-            return tokenLifetime;
-        }
-
+        
         private async Task ThrowIfResponseIsInvalid(HttpResponseMessage response)
         {
             if (response.StatusCode != HttpStatusCode.OK)
@@ -112,6 +95,23 @@ namespace Ks.Fiks.Maskinporten.Client
                 throw new UnexpectedResponseException(
                     $"Got unexpected HTTP Status code {response.StatusCode} from {_properties.TokenEndpoint}. Content: {content}.");
             }
+        }
+
+        private async Task<MaskinportenToken> CreateTokenFromResponse(HttpResponseMessage response)
+        {
+            var maskinportenResponse = await ReadResponse(response);
+            var accessTokenAsJsonString = _responseDecoder.JwtAsString(maskinportenResponse.AccessToken);
+
+            return MaskinportenToken.CreateFromJsonString(
+                accessTokenAsJsonString,
+                maskinportenResponse.ExpiresIn - _properties.NumberOfSecondsLeftBeforeExpire
+                );
+        }
+
+        private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
+        {
+            var responseAsJson = await responseMessage.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
         }
     }
 }

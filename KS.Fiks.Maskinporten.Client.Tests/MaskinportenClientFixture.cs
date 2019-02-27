@@ -13,10 +13,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 {
     public class MaskinportenClientFixture
     {
-        private string _accessToken;
         private HttpStatusCode _statusCode = HttpStatusCode.OK;
         private bool _useIncorrectCertificate = false;
-        private Int64 _expirationTime;
+        private long _expirationTime;
 
         public MaskinportenClientFixture()
         {
@@ -38,11 +37,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 new HttpClient(HttpMessageHandleMock.Object));
         }
 
-        public MaskinportenClientFixture WithAccessToken(string accessToken)
-        {
-            _accessToken = accessToken;
-            return this;
-        }
 
         public MaskinportenClientFixture WithStatusCode(HttpStatusCode statusCode)
         {
@@ -56,10 +50,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             return this;
         }
 
-        public MaskinportenClientFixture WithExpirationTime(TimeSpan expirationTimeFromNow)
+        public MaskinportenClientFixture WithIdportenExpirationDuration(int expirationTime)
         {
-            var newExpirationTime = UnixEpoch.GetSecondsSince(DateTime.UtcNow.Add(expirationTimeFromNow));
-            _expirationTime = Convert.ToInt64(newExpirationTime);
+            _expirationTime = expirationTime;
 
             return this;
         }
@@ -72,9 +65,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private void SetDefaultValues()
         {
             SetDefaultProperties();
-            _accessToken = "token";
-            var newExpirationTime = UnixEpoch.GetSecondsSince(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(10));
-            _expirationTime = Convert.ToInt64(newExpirationTime);
+            _expirationTime = 120;
         }
 
         private void SetResponse()
@@ -102,7 +93,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private string GenerateJsonResponse()
         {
             dynamic response = new JObject();
-            response.Add("expires_in", 1);
+            response.Add("expires_in", _expirationTime);
 
             var tokenResponse = new Dictionary<string, object>
             {
@@ -110,7 +101,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 {"scope", "test-scope"},
                 {"iss", "https://test.no/oidc-provider/"},
                 {"token_type", "bearer"},
-                {"exp",  _expirationTime},
+                {"exp",  1550832858},
                 {"iat", 1550832828},
                 {"client_orgno", "987654321"},
                 {"jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY="}
