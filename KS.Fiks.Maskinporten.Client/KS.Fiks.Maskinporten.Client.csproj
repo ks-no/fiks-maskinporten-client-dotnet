@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -13,6 +14,7 @@
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="JWT" Version="4.0.0" />
+      <PackageReference Include="MSBump" Version="2.3.2" PrivateAssets="All" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     </ItemGroup>
 
