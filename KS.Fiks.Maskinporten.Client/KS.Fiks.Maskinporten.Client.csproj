@@ -7,7 +7,7 @@
     </PropertyGroup>
     <PropertyGroup>
         <PackageId>MaskinportenClient</PackageId>
-        <Version>0.0.3</Version>
+        <Version>0.0.4</Version>
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="JWT" Version="4.0.0" />
