@@ -43,9 +43,10 @@ namespace Ks.Fiks.Maskinporten.Client
 
         public async Task<MaskinportenToken> GetAccessToken(string scopes)
         {
-            var tokenAsString = await _tokenCache.GetToken(scopes, async () => await GetNewAccessToken(scopes),
+            return await _tokenCache.GetToken(
+                scopes, 
+                async () => await GetNewAccessToken(scopes),
                 CalculateTokenLifetime);
-            return MaskinportenToken.CreateFromJsonString(tokenAsString);
         }
 
         private string ScopesAsString(IEnumerable<string> scopes)
@@ -64,7 +65,7 @@ namespace Ks.Fiks.Maskinporten.Client
             var maskinportenResponse = await ReadResponse(response);
             var accessTokenAsJwt = maskinportenResponse.AccessToken;
             var accessTokenAsString = _responseDecoder.JwtAsString(accessTokenAsJwt);
-            return MaskinportenToken.CreateFromJsonString(accessTokenAsString)
+            return MaskinportenToken.CreateFromJsonString(accessTokenAsString);
         }
 
         private void SetRequestHeaders()
