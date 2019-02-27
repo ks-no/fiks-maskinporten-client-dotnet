@@ -21,9 +21,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         {
             SetDefaultValues();
         }
-        
+
         public Mock<HttpMessageHandler> HttpMessageHandleMock { get; private set; }
-        
+
         public MaskinportenClientProperties Properties { get; private set; }
 
         public List<string> DefaultScopes => new List<string>();
@@ -32,8 +32,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         {
             SetResponse();
             return new MaskinportenClient(
-                _useIncorrectCertificate ? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate, 
-                Properties, 
+                _useIncorrectCertificate ? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate,
+                Properties,
                 new HttpClient(HttpMessageHandleMock.Object));
         }
 
@@ -43,7 +43,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             _statusCode = statusCode;
             return this;
         }
-        
+
         public MaskinportenClientFixture WithIncorrectCertificate()
         {
             _useIncorrectCertificate = true;
@@ -57,17 +57,17 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             return this;
         }
 
-        private void SetDefaultProperties()
-        {
-            Properties = new MaskinportenClientProperties("testAudience", "http://test.no", "testIssuer", 1);
-        }
-
         private void SetDefaultValues()
         {
             SetDefaultProperties();
             _expirationTime = 120;
         }
-
+        
+        private void SetDefaultProperties()
+        {
+            Properties = new MaskinportenClientProperties("testAudience", "http://test.no", "testIssuer", 1);
+        }
+        
         private void SetResponse()
         {
             var responseMessage = new HttpResponseMessage()
@@ -75,7 +75,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 StatusCode = _statusCode,
                 Content = new StringContent(GenerateJsonResponse()),
             };
-            
+
             HttpMessageHandleMock = new Mock<HttpMessageHandler>();
             HttpMessageHandleMock
                 .Protected()
@@ -87,8 +87,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 .ReturnsAsync(responseMessage)
                 .Verifiable();
         }
-        
-        
+
 
         private string GenerateJsonResponse()
         {
@@ -97,11 +96,11 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
             var tokenResponse = new Dictionary<string, object>
             {
-                {"aud", "test-aud"}, 
+                {"aud", "test-aud"},
                 {"scope", "test-scope"},
                 {"iss", "https://test.no/oidc-provider/"},
                 {"token_type", "bearer"},
-                {"exp",  1550832858},
+                {"exp", 1550832858},
                 {"iat", 1550832828},
                 {"client_orgno", "987654321"},
                 {"jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY="}

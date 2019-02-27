@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Ks.Fiks.Maskinporten.Client.Cache;
@@ -14,7 +15,8 @@ namespace Ks.Fiks.Maskinporten.Client
     public class MaskinportenClient : IMaskinportenClient
     {
         private const string GrantType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
-
+        private const string MediaTypeFromUrl = "application/x-www-form-urlencoded";
+        private const string CharsetUtf8 = "utf-8";
         private readonly MaskinportenClientProperties _properties;
         private readonly HttpClient _httpClient;
 
@@ -81,8 +83,8 @@ namespace Ks.Fiks.Maskinporten.Client
                 new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(scopes, _properties))
             });
 
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            content.Headers.Add("Charset", "utf-8");
+            content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeFromUrl);
+            content.Headers.Add("Charset", CharsetUtf8);
 
             return content;
         }
