@@ -21,7 +21,7 @@ namespace Ks.Fiks.Maskinporten.Client
         private readonly IJwtRequestTokenGenerator _tokenGenerator;
         private readonly IJwtResponseDecoder _responseDecoder;
 
-        private readonly ITokenCache<string> _tokenCache;
+        private readonly ITokenCache<MaskinportenToken> _tokenCache;
 
         public MaskinportenClient(
             X509Certificate2 certificate,
@@ -30,7 +30,7 @@ namespace Ks.Fiks.Maskinporten.Client
         {
             _properties = properties;
             _httpClient = httpClient ?? new HttpClient();
-            _tokenCache = new TokenCache<string>();
+            _tokenCache = new TokenCache<MaskinportenToken>();
             _tokenGenerator = new JwtRequestTokenGenerator(certificate);
             _responseDecoder = new JwtResponseDecoder();
         }
@@ -53,7 +53,7 @@ namespace Ks.Fiks.Maskinporten.Client
             return string.Join(" ", scopes);
         }
 
-        private async Task<string> GetNewAccessToken(string scopes)
+        private async Task<MaskinportenToken> GetNewAccessToken(string scopes)
         {
             SetRequestHeaders();
             var requestContent = CreateRequestContent(scopes);
@@ -63,8 +63,8 @@ namespace Ks.Fiks.Maskinporten.Client
 
             var maskinportenResponse = await ReadResponse(response);
             var accessTokenAsJwt = maskinportenResponse.AccessToken;
-            var accessToken = _responseDecoder.JwtAsString(accessTokenAsJwt);
-            return accessToken;
+            var accessTokenAsString = _responseDecoder.JwtAsString(accessTokenAsJwt);
+            return MaskinportenToken.CreateFromJsonString(accessTokenAsString)
         }
 
         private void SetRequestHeaders()
@@ -89,25 +89,15 @@ namespace Ks.Fiks.Maskinporten.Client
             return content;
         }
 
-        private async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
+        private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
         {
             var responseAsJson = await responseMessage.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
         }
 
-        private TimeSpan CalculateTokenLifetime(string tokenAsJson)
+        private TimeSpan CalculateTokenLifetime(MaskinportenToken token)
         {
-            var tokenAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(tokenAsJson);
-            if (!tokenAsDictionary.ContainsKey("exp"))
-            {
-                throw new ArgumentException("tokenAsJson does not contain field 'exp'");
-            }
-
-            var expirationTimeInUtcSeconds = (long) tokenAsDictionary["exp"];
-            var expirationTime =
-                DateTime.UnixEpoch.AddSeconds(expirationTimeInUtcSeconds);
-
-            var tokenLifetime = expirationTime - DateTime.UtcNow -
+            var tokenLifetime = token.ExpirationTime - DateTime.UtcNow -
                                 TimeSpan.FromSeconds(_properties.NumberOfSecondsLeftBeforeExpire);
 
             return tokenLifetime;
