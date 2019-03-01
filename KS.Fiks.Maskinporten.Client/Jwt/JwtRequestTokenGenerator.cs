@@ -11,12 +11,11 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
     public class JwtRequestTokenGenerator : IJwtRequestTokenGenerator
     {
         private const int JwtExpireTimeInMinutes = 2;
-        private const string DummyKey = ""; // Required by encoder, but not used with RS256Algorithm 
+        private const string DummyKey = ""; // Required by encoder, but not used with RS256Algorithm
 
         private readonly JwtEncoder _encoder;
         private readonly X509Certificate2 _certificate;
-        
-        
+
         public JwtRequestTokenGenerator(X509Certificate2 certificate)
         {
             _certificate = certificate;
@@ -28,7 +27,6 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 
         public string CreateEncodedJwt(string scope, MaskinportenClientProperties properties)
         {
-
             var payload = CreateJwtPayload(scope, properties);
             var header = CreateJwtHeader();
             var jwt = _encoder.Encode(header, payload, DummyKey);
@@ -42,7 +40,7 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
             {
                 {
                     "x5c",
-                    new List<string>() {Convert.ToBase64String(_certificate.Export(X509ContentType.Cert))}
+                    new List<string>() { Convert.ToBase64String(_certificate.Export(X509ContentType.Cert)) }
                 }
             };
         }

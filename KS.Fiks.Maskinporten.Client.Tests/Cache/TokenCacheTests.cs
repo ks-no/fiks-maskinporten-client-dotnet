@@ -21,7 +21,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
 
             var expectedValue = _fixture.GetRandomToken();
 
-            var actualValue = await sut.GetToken("key", () => Task.FromResult(expectedValue));
+            var actualValue = await sut.GetToken("key", () => Task.FromResult(expectedValue)).ConfigureAwait(false);
 
             actualValue.Should().Be(expectedValue);
         }
@@ -34,10 +34,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
             var expectedValue = _fixture.GetRandomToken(10);
             var otherValue = _fixture.GetRandomToken(10);
 
-
-            var firstValue = await sut.GetToken("key", () => Task.FromResult(expectedValue));
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
-            var secondValue = await sut.GetToken("key", () => Task.FromResult(otherValue));
+            var firstValue = await sut.GetToken("key", () => Task.FromResult(expectedValue)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+            var secondValue = await sut.GetToken("key", () => Task.FromResult(otherValue)).ConfigureAwait(false);
 
             secondValue.Should().Be(expectedValue);
         }
@@ -50,9 +49,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
             var expectedValue = _fixture.GetRandomToken(1);
             var otherValue = _fixture.GetRandomToken(1);
 
-            var firstValue = await sut.GetToken("key", () => Task.FromResult(otherValue));
-            await Task.Delay(TimeSpan.FromMilliseconds(1500));
-            var secondValue = await sut.GetToken("key", () => Task.FromResult(expectedValue));
+            var firstValue = await sut.GetToken("key", () => Task.FromResult(otherValue)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(1500)).ConfigureAwait(false);
+            var secondValue = await sut.GetToken("key", () => Task.FromResult(expectedValue)).ConfigureAwait(false);
 
             secondValue.Should().Be(expectedValue);
         }

@@ -16,25 +16,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 {
     public static class TestHelper
     {
-        private static readonly RSAlgorithmFactory _factory;
-        private static readonly JsonNetSerializer _serializer;
-        private static readonly JwtValidator _validator;
-        private static readonly JwtBase64UrlEncoder _urlEncoder;
-
-
-        static TestHelper()
-        {
-            Certificate = new X509Certificate2("alice-virksomhetssertifikat.p12",
-                "PASSWORD");
-
-            CertificateOtherThanUsedForDecode = new X509Certificate2("bob-virksomhetssertifikat.p12",
-                "PASSWORD");
-
-            _factory = new RSAlgorithmFactory(() => Certificate);
-            _serializer = new JsonNetSerializer();
-            _validator = new JwtValidator(_serializer, new UtcDateTimeProvider());
-            _urlEncoder = new JwtBase64UrlEncoder();
-        }
+        private static readonly RSAlgorithmFactory _factory = new RSAlgorithmFactory(() => Certificate);
+        private static readonly JsonNetSerializer _serializer = new JsonNetSerializer();
+        private static readonly JwtValidator _validator = new JwtValidator(_serializer, new UtcDateTimeProvider());
+        private static readonly JwtBase64UrlEncoder _urlEncoder = new JwtBase64UrlEncoder();
 
         public static Dictionary<string, string> RequestContentAsDictionary(HttpRequestMessage request)
         {
@@ -44,15 +29,20 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             return query.AllKeys.ToDictionary(t => t, t => query[t]);
         }
 
-        public static X509Certificate2 Certificate { get; }
-        public static X509Certificate2 CertificateOtherThanUsedForDecode { get; }
+        public static X509Certificate2 Certificate =>
+            new X509Certificate2(
+                "alice-virksomhetssertifikat.p12",
+                "PASSWORD");
 
+        public static X509Certificate2 CertificateOtherThanUsedForDecode =>
+            new X509Certificate2(
+                "bob-virksomhetssertifikat.p12",
+                "PASSWORD");
 
         public static bool RequestContentIsJwt(HttpRequestMessage request, string jwtFieldName)
         {
             var content = RequestContentAsDictionary(request);
             var serializedJwt = content[jwtFieldName];
-
 
             try
             {
@@ -84,7 +74,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var deserializedJwt = GetDeserializedJwt(serializedJwt);
 
             var jwtAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(deserializedJwt);
-            return (T) jwtAsDictionary[field];
+            return (T)jwtAsDictionary[field];
         }
 
         private static string GetDeserializedJwt(string serializedJwt)

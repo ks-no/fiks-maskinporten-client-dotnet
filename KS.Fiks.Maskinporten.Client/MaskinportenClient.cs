@@ -40,14 +40,21 @@ namespace Ks.Fiks.Maskinporten.Client
         public async Task<MaskinportenToken> GetAccessToken(IEnumerable<string> scopes)
         {
             var scopesAsString = ScopesAsString(scopes);
-            return await GetAccessToken(scopesAsString);
+            return await GetAccessToken(scopesAsString).ConfigureAwait(false);
         }
 
         public async Task<MaskinportenToken> GetAccessToken(string scopes)
         {
             return await _tokenCache.GetToken(
-                scopes,
-                async () => await GetNewAccessToken(scopes));
+                                        scopes,
+                                        async () => await GetNewAccessToken(scopes).ConfigureAwait(false))
+                                    .ConfigureAwait(false);
+        }
+
+        private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
+        {
+            var responseAsJson = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
         }
 
         private string ScopesAsString(IEnumerable<string> scopes)
@@ -60,11 +67,12 @@ namespace Ks.Fiks.Maskinporten.Client
             SetRequestHeaders();
             var requestContent = CreateRequestContent(scopes);
 
-            var response = await _httpClient.PostAsync(_properties.TokenEndpoint, requestContent);
+            var tokenUri = new Uri(_properties.TokenEndpoint);
+            var response = await _httpClient.PostAsync(tokenUri, requestContent).ConfigureAwait(false);
 
-            await ThrowIfResponseIsInvalid(response);
+            await ThrowIfResponseIsInvalid(response).ConfigureAwait(false);
 
-            return await CreateTokenFromResponse(response);
+            return await CreateTokenFromResponse(response).ConfigureAwait(false);
         }
 
         private void SetRequestHeaders()
@@ -74,7 +82,7 @@ namespace Ks.Fiks.Maskinporten.Client
                 NoCache = true
             };
         }
-        
+
         private FormUrlEncodedContent CreateRequestContent(string scopes)
         {
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
@@ -88,12 +96,12 @@ namespace Ks.Fiks.Maskinporten.Client
 
             return content;
         }
-        
+
         private async Task ThrowIfResponseIsInvalid(HttpResponseMessage response)
         {
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 throw new UnexpectedResponseException(
                     $"Got unexpected HTTP Status code {response.StatusCode} from {_properties.TokenEndpoint}. Content: {content}.");
             }
@@ -101,19 +109,12 @@ namespace Ks.Fiks.Maskinporten.Client
 
         private async Task<MaskinportenToken> CreateTokenFromResponse(HttpResponseMessage response)
         {
-            var maskinportenResponse = await ReadResponse(response);
+            var maskinportenResponse = await ReadResponse(response).ConfigureAwait(false);
             var accessTokenAsJsonString = _responseDecoder.JwtAsString(maskinportenResponse.AccessToken);
 
             return MaskinportenToken.CreateFromJsonString(
                 accessTokenAsJsonString,
-                maskinportenResponse.ExpiresIn - _properties.NumberOfSecondsLeftBeforeExpire
-                );
-        }
-
-        private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
-        {
-            var responseAsJson = await responseMessage.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
+                maskinportenResponse.ExpiresIn - _properties.NumberOfSecondsLeftBeforeExpire);
         }
     }
 }

@@ -1,22 +1,17 @@
 using System;
+using Castle.Core.Internal;
 using Ks.Fiks.Maskinporten.Client.Cache;
 
 namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
 {
     public class TokenCacheFixture
     {
+        private string _tokenString;
+        private bool _dummy;
+
         public TokenCacheFixture()
         {
-        }
-
-        public TokenCache CreateSut()
-        {
-            return new TokenCache();
-        }
-
-        public MaskinportenToken GetRandomToken(int expiresIn = 120)
-        {
-            var tokenString = @"{
+            _tokenString = @"{
             ""aud"": ""oidc_ks_test"",
             ""scope"": ""ks"",
             ""iss"": ""https://oidc-ver2.difi.no/idporten-oidc-provider/"",
@@ -24,9 +19,18 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
             ""exp"": 1550837855,
             ""iat"": 1550837825,
             ""client_orgno"": ""987654321"",
-            ""jti"": """+Guid.NewGuid()+"\"}";
-            
-            return MaskinportenToken.CreateFromJsonString(tokenString, expiresIn);
+            ""jti"": """ + Guid.NewGuid() + "\"}";
+        }
+
+        public TokenCache CreateSut()
+        {
+            _dummy = _dummy ? true : false; // Disable static rule for fixture;
+            return new TokenCache();
+        }
+
+        public MaskinportenToken GetRandomToken(int expiresIn = 120)
+        {
+            return MaskinportenToken.CreateFromJsonString(_tokenString, expiresIn);
         }
     }
 }

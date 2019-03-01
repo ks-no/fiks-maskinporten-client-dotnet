@@ -21,7 +21,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             }";
 
             var token = MaskinportenToken.CreateFromJsonString(maskinportenTokenAsJsonString, 120);
-            
+
             token.Audience.Should().Be("oidc_ks_test");
             token.Scope.Should().Be("ks");
             token.Issuer.Should().Be("https://oidc-ver2.difi.no/idporten-oidc-provider/");

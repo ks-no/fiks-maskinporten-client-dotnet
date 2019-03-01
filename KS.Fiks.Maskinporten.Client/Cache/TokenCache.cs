@@ -11,7 +11,6 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
         private readonly Dictionary<string, MaskinportenToken> _cacheDictionary;
         private readonly SemaphoreSlim _mutex;
 
-
         public TokenCache()
         {
             _cacheDictionary = new Dictionary<string, MaskinportenToken>();
@@ -20,16 +19,30 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 
         public async Task<MaskinportenToken> GetToken(string tokenKey, Func<Task<MaskinportenToken>> tokenFactory)
         {
-            await _mutex.WaitAsync();
+            await _mutex.WaitAsync().ConfigureAwait(false);
             try
             {
                 return HasValidEntry(tokenKey)
                     ? _cacheDictionary[tokenKey]
-                    : await UpdateOrAddToken(tokenKey, tokenFactory);
+                    : await UpdateOrAddToken(tokenKey, tokenFactory).ConfigureAwait(false);
             }
             finally
             {
                 _mutex.Release();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _mutex?.Dispose();
             }
         }
 
@@ -43,10 +56,11 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
             return !_cacheDictionary[tokenKey].IsExpiring();
         }
 
-        private async Task<MaskinportenToken> UpdateOrAddToken(string tokenKey,
+        private async Task<MaskinportenToken> UpdateOrAddToken(
+            string tokenKey,
             Func<Task<MaskinportenToken>> tokenFactory)
         {
-            var newToken = await tokenFactory();
+            var newToken = await tokenFactory().ConfigureAwait(false);
             if (_cacheDictionary.ContainsKey(tokenKey))
             {
                 _cacheDictionary[tokenKey] = newToken;
@@ -57,11 +71,6 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
             }
 
             return newToken;
-        }
-
-        public void Dispose()
-        {
-            _mutex?.Dispose();
         }
     }
 }

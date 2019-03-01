@@ -6,7 +6,7 @@
         <RootNamespace>KS.Fiks.Maskinporten.Client</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>MaskinportenClient</PackageId>
-        <Version>0.0.4</Version>
+        <Version>0.0.4-dev0089</Version>
         <Authors>KS DotNet Team</Authors>
         <Copyright>© KS 2019</Copyright>
         <Title>Library for integration with DIFI Maskinporten</Title>
@@ -14,7 +14,7 @@
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="JWT" Version="4.0.0" />
-      <PackageReference Include="KS.Fiks.QA" Version="0.9.9-dev-47" />
+      <PackageReference Include="KS.Fiks.QA" Version="0.9.9-dev-50" />
       <PackageReference Include="MSBump" Version="2.3.2" PrivateAssets="All" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     </ItemGroup>
