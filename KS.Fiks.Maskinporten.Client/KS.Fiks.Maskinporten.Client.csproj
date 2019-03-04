@@ -5,7 +5,7 @@
         <TargetFramework>netcoreapp2.2</TargetFramework>
         <RootNamespace>KS.Fiks.Maskinporten.Client</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageId>MaskinportenClient</PackageId>
+        <PackageId>KS.Fiks.MaskinportenClient</PackageId>
         <Version>0.0.4-dev0089</Version>
         <Authors>KS DotNet Team</Authors>
         <Copyright>© KS 2019</Copyright>
