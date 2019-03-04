@@ -38,13 +38,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
             var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
-            accessToken.Issuer.Should().NotBeEmpty();
-            accessToken.Audience.Should().NotBeEmpty();
-            accessToken.Scope.Should().NotBeEmpty();
-            accessToken.JwtId.Should().NotBeEmpty();
-            accessToken.ClientOrgno.Should().NotBeEmpty();
-            accessToken.ExpirationTime.Should().BeAfter(UnixEpoch.Value);
-            accessToken.IssuedAt.Should().BeAfter(UnixEpoch.Value);
+            accessToken.Token.Should().NotBeEmpty();
         }
 
         [Fact]

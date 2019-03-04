@@ -22,15 +22,15 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
             ""jti"": """ + Guid.NewGuid() + "\"}";
         }
 
+        // ReSharper disable once CA1822
         public TokenCache CreateSut()
         {
-            _dummy = _dummy ? true : false; // Disable static rule for fixture;
             return new TokenCache();
         }
 
         public MaskinportenToken GetRandomToken(int expiresIn = 120)
         {
-            return MaskinportenToken.CreateFromJsonString(_tokenString, expiresIn);
+            return new MaskinportenToken(_tokenString, expiresIn);
         }
     }
 }

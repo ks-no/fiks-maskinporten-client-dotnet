@@ -110,11 +110,16 @@ namespace Ks.Fiks.Maskinporten.Client
         private async Task<MaskinportenToken> CreateTokenFromResponse(HttpResponseMessage response)
         {
             var maskinportenResponse = await ReadResponse(response).ConfigureAwait(false);
-            var accessTokenAsJsonString = _responseDecoder.JwtAsString(maskinportenResponse.AccessToken);
 
-            return MaskinportenToken.CreateFromJsonString(
-                accessTokenAsJsonString,
-                maskinportenResponse.ExpiresIn - _properties.NumberOfSecondsLeftBeforeExpire);
+            return new MaskinportenToken(
+                maskinportenResponse.AccessToken,
+                ExpirationTimeInSeconds(maskinportenResponse.ExpiresIn));
+
+        }
+
+        private int ExpirationTimeInSeconds(int tokenExpiresIn)
+        {
+            return tokenExpiresIn - _properties.NumberOfSecondsLeftBeforeExpire;
         }
     }
 }
