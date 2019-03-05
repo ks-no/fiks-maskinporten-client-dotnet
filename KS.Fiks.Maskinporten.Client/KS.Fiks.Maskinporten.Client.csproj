@@ -6,7 +6,7 @@
         <RootNamespace>KS.Fiks.Maskinporten.Client</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>KS.Fiks.Maskinporten.Client</PackageId>
-        <Version>0.0.4-dev0091</Version>
+        <VersionPrefix>0.0.4</VersionPrefix>
         <Authors>KS DotNet Team</Authors>
         <Copyright>© KS 2019</Copyright>
         <Title>Library for integration with DIFI Maskinporten</Title>
