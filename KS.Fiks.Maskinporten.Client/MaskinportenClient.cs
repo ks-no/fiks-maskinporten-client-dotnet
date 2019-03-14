@@ -17,7 +17,7 @@ namespace Ks.Fiks.Maskinporten.Client
         private const string GrantType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
         private const string MediaTypeFromUrl = "application/x-www-form-urlencoded";
         private const string CharsetUtf8 = "utf-8";
-        private readonly MaskinportenClientProperties _properties;
+        private readonly MaskinportenClientConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
         private readonly IJwtRequestTokenGenerator _tokenGenerator;
@@ -26,14 +26,13 @@ namespace Ks.Fiks.Maskinporten.Client
         private readonly ITokenCache _tokenCache;
 
         public MaskinportenClient(
-            X509Certificate2 certificate,
-            MaskinportenClientProperties properties,
+            MaskinportenClientConfiguration configuration,
             HttpClient httpClient = null)
         {
-            _properties = properties;
+            _configuration = configuration;
             _httpClient = httpClient ?? new HttpClient();
             _tokenCache = new TokenCache();
-            _tokenGenerator = new JwtRequestTokenGenerator(certificate);
+            _tokenGenerator = new JwtRequestTokenGenerator(_configuration.Certificate);
             _responseDecoder = new JwtResponseDecoder();
         }
 
@@ -67,7 +66,7 @@ namespace Ks.Fiks.Maskinporten.Client
             SetRequestHeaders();
             var requestContent = CreateRequestContent(scopes);
 
-            var tokenUri = new Uri(_properties.TokenEndpoint);
+            var tokenUri = new Uri(_configuration.TokenEndpoint);
             var response = await _httpClient.PostAsync(tokenUri, requestContent).ConfigureAwait(false);
 
             await ThrowIfResponseIsInvalid(response).ConfigureAwait(false);
@@ -88,7 +87,7 @@ namespace Ks.Fiks.Maskinporten.Client
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
             {
                 new KeyValuePair<string, string>("grant_type", GrantType),
-                new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(scopes, _properties))
+                new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(scopes, _configuration))
             });
 
             content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeFromUrl);
@@ -103,7 +102,7 @@ namespace Ks.Fiks.Maskinporten.Client
             {
                 var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 throw new UnexpectedResponseException(
-                    $"Got unexpected HTTP Status code {response.StatusCode} from {_properties.TokenEndpoint}. Content: {content}.");
+                    $"Got unexpected HTTP Status code {response.StatusCode} from {_configuration.TokenEndpoint}. Content: {content}.");
             }
         }
 
@@ -119,7 +118,7 @@ namespace Ks.Fiks.Maskinporten.Client
 
         private int ExpirationTimeInSeconds(int tokenExpiresIn)
         {
-            return tokenExpiresIn - _properties.NumberOfSecondsLeftBeforeExpire;
+            return tokenExpiresIn - _configuration.NumberOfSecondsLeftBeforeExpire;
         }
     }
 }

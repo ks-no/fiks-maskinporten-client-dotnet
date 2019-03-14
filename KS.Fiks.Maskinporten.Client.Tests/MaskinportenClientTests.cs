@@ -45,7 +45,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task SendsRequestToTokenEndpoint()
         {
             var tokenEndpoint = "https://test.ks.no/api/token";
-            _fixture.Properties.TokenEndpoint = tokenEndpoint;
+            _fixture.Configuration.TokenEndpoint = tokenEndpoint;
 
             var sut = _fixture.CreateSut();
 
@@ -96,7 +96,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public async Task DoesNotSendRequestTwiceIfSecondCallIsWithinTimelimitGivenNumberOfSecondsLeftBeforeExpire()
         {
-            _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 8;
+            _fixture.Configuration.NumberOfSecondsLeftBeforeExpire = 8;
             var sut = _fixture.WithIdportenExpirationDuration(10).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
@@ -114,7 +114,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimitGivenNumberOfSecondsLeftBeforeExpire()
         {
-            _fixture.Properties.NumberOfSecondsLeftBeforeExpire = 1;
+            _fixture.Configuration.NumberOfSecondsLeftBeforeExpire = 1;
             var sut = _fixture.WithIdportenExpirationDuration(2).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
@@ -180,7 +180,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task AssertionDeserializedHasCorrectAudience()
         {
             var expectedAudience = "testAudience";
-            _fixture.Properties.Audience = expectedAudience;
+            _fixture.Configuration.Audience = expectedAudience;
             var sut = _fixture.CreateSut();
 
             await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
@@ -197,7 +197,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task AssertionDeserializedHasCorrectIssuer()
         {
             var expectedIssuer = "testIssuer";
-            _fixture.Properties.Issuer = expectedIssuer;
+            _fixture.Configuration.Issuer = expectedIssuer;
             var sut = _fixture.CreateSut();
 
             await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);

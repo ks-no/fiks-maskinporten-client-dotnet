@@ -25,9 +25,9 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
                 new JwtBase64UrlEncoder());
         }
 
-        public string CreateEncodedJwt(string scope, MaskinportenClientProperties properties)
+        public string CreateEncodedJwt(string scope, MaskinportenClientConfiguration configuration)
         {
-            var payload = CreateJwtPayload(scope, properties);
+            var payload = CreateJwtPayload(scope, configuration);
             var header = CreateJwtHeader();
             var jwt = _encoder.Encode(header, payload, DummyKey);
 
@@ -45,12 +45,12 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
             };
         }
 
-        private IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientProperties properties)
+        private IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientConfiguration configuration)
         {
             var jwtData = new JwtData();
 
-            jwtData.Payload.Add("iss", properties.Issuer);
-            jwtData.Payload.Add("aud", properties.Audience);
+            jwtData.Payload.Add("iss", configuration.Issuer);
+            jwtData.Payload.Add("aud", configuration.Audience);
             jwtData.Payload.Add("iat", UnixEpoch.GetSecondsSince(DateTime.UtcNow));
             jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddMinutes(JwtExpireTimeInMinutes)));
             jwtData.Payload.Add("scope", scope);

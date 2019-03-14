@@ -24,16 +24,19 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         public Mock<HttpMessageHandler> HttpMessageHandleMock { get; private set; }
 
-        public MaskinportenClientProperties Properties { get; private set; }
+        public MaskinportenClientConfiguration Configuration { get; private set; }
 
         public List<string> DefaultScopes { get; private set; }
 
         public MaskinportenClient CreateSut()
         {
             SetResponse();
+            Configuration.Certificate = _useIncorrectCertificate
+                ? TestHelper.CertificateOtherThanUsedForDecode
+                : TestHelper.Certificate;
+
             return new MaskinportenClient(
-                _useIncorrectCertificate ? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate,
-                Properties,
+                Configuration,
                 new HttpClient(HttpMessageHandleMock.Object));
         }
 
@@ -65,7 +68,13 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         private void SetDefaultProperties()
         {
-            Properties = new MaskinportenClientProperties("testAudience", "http://test.no", "testIssuer", 1);
+            Configuration = new MaskinportenClientConfiguration
+            {
+                Audience = "testAudience",
+                TokenEndpoint = "http://test.no",
+                Issuer = "testIssuer",
+                NumberOfSecondsLeftBeforeExpire = 1
+            };
         }
 
         private void SetResponse()
@@ -94,18 +103,18 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
             var tokenResponse = new Dictionary<string, object>
             {
-                { "aud", "test-aud" },
-                { "scope", "test-scope" },
-                { "iss", "https://test.no/oidc-provider/" },
-                { "token_type", "bearer" },
-                { "exp", 1550832858 },
-                { "iat", 1550832828 },
-                { "client_orgno", "987654321" },
-                { "jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY=" }
+                {"aud", "test-aud"},
+                {"scope", "test-scope"},
+                {"iss", "https://test.no/oidc-provider/"},
+                {"token_type", "bearer"},
+                {"exp", 1550832858},
+                {"iat", 1550832828},
+                {"client_orgno", "987654321"},
+                {"jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY="}
             };
             var tokenHeader = new Dictionary<string, object>
             {
-                { "kid", "mqT5A3LOSIHbpKrscb3EHGrr-WIFRfLdaqZ_5J9GR9s" }
+                {"kid", "mqT5A3LOSIHbpKrscb3EHGrr-WIFRfLdaqZ_5J9GR9s"}
             };
             var encodedToken = TestHelper.EncodeJwt(tokenHeader, tokenResponse);
 

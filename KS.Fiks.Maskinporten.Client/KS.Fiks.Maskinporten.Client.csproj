@@ -13,9 +13,9 @@
 
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="JWT" Version="4.0.0"/>
-        <PackageReference Include="KS.Fiks.QA" Version="0.9.9-dev-50" PrivateAssets="All"/>
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.1"/>
+        <PackageReference Include="JWT" Version="4.0.0" />
+        <PackageReference Include="KS.Fiks.QA" Version="0.9.9-dev-50" PrivateAssets="All" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     </ItemGroup>
 
 </Project>

@@ -7,7 +7,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
     public class TokenCacheFixture
     {
         private string _tokenString;
-        private bool _dummy;
 
         public TokenCacheFixture()
         {
@@ -22,7 +21,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
             ""jti"": """ + Guid.NewGuid() + "\"}";
         }
 
-        // ReSharper disable once CA1822
         public TokenCache CreateSut()
         {
             return new TokenCache();
