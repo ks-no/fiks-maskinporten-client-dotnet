@@ -113,7 +113,6 @@ namespace Ks.Fiks.Maskinporten.Client
             return new MaskinportenToken(
                 maskinportenResponse.AccessToken,
                 ExpirationTimeInSeconds(maskinportenResponse.ExpiresIn));
-
         }
 
         private int ExpirationTimeInSeconds(int tokenExpiresIn)

@@ -32,7 +32,7 @@ namespace Ks.Fiks.Maskinporten.Client
         {
             unchecked
             {
-                return Token.GetHashCode(StringComparison.Ordinal);
+                return Token.GetHashCode();
             }
         }
 

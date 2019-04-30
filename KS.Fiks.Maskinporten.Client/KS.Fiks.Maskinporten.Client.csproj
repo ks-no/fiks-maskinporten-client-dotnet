@@ -2,20 +2,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
-        <RootNamespace>KS.Fiks.Maskinporten.Client</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageId>KS.Fiks.Maskinporten.Client</PackageId>
-        <VersionPrefix>0.0.5</VersionPrefix>
-        <Authors>KS DotNet Team</Authors>
-        <Copyright>© KS 2019</Copyright>
-        <Title>Library for integration with DIFI Maskinporten</Title>
-
+        <Title>KS FIKS Maskinporten Client</Title>
+        <Authors>Ks-Kommunesektorens Organisasjon</Authors>
+        <Copyright>Ks-Kommunesektorens Organisasjon</Copyright>
+        <RootNamespace>KS.Fiks.Maskinporten.Client</RootNamespace>
+        <PackageProjectUrl>https://github.com/ks-no/fiks-maskinporten-client-dotnet</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/ks-no/fiks-maskinporten-client-dotnet/raw/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/ks-no/fiks-maskinporten-client-dotnet.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>FIKS</PackageTags>
+        <VersionPrefix>0.0.6</VersionPrefix>
+        <PackageIconUrl>https://ks-no.github.io/images/favicon.png</PackageIconUrl>
+        <TargetFrameworks>netstandard2.0;netcoreapp2.2</TargetFrameworks>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="JWT" Version="4.0.0" />
-        <PackageReference Include="KS.Fiks.QA" Version="0.9.9-dev-50" PrivateAssets="All" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+        <PackageReference Include="KS.Fiks.QA" Version="1.0.0-dev-69" PrivateAssets="All" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     </ItemGroup>
 
 </Project>
