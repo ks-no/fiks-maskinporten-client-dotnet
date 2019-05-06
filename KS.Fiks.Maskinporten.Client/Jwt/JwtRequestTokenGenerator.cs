@@ -45,7 +45,7 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
             };
         }
 
-        private IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientConfiguration configuration)
+        private static IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientConfiguration configuration)
         {
             var jwtData = new JwtData();
 
