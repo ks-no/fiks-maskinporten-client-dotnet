@@ -12,7 +12,7 @@
         <RepositoryUrl>https://github.com/ks-no/fiks-maskinporten-client-dotnet.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>FIKS</PackageTags>
-        <VersionPrefix>0.0.6</VersionPrefix>
+        <VersionPrefix>1.0.0</VersionPrefix>
         <PackageIconUrl>https://ks-no.github.io/images/favicon.png</PackageIconUrl>
         <TargetFrameworks>netstandard2.0;netcoreapp2.2</TargetFrameworks>
         <IncludeSymbols>true</IncludeSymbols>
