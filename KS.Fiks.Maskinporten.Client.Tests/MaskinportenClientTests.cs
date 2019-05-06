@@ -45,9 +45,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task SendsRequestToTokenEndpoint()
         {
             var tokenEndpoint = "https://test.ks.no/api/token";
-            _fixture.Configuration.TokenEndpoint = tokenEndpoint;
 
-            var sut = _fixture.CreateSut();
+            var sut = _fixture.WithTokenEndpoint(tokenEndpoint).CreateSut();
 
             await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
@@ -96,8 +95,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public async Task DoesNotSendRequestTwiceIfSecondCallIsWithinTimelimitGivenNumberOfSecondsLeftBeforeExpire()
         {
-            _fixture.Configuration.NumberOfSecondsLeftBeforeExpire = 8;
-            var sut = _fixture.WithIdportenExpirationDuration(10).CreateSut();
+            var sut = _fixture.WithIdportenExpirationDuration(10).WithNumberOfSecondsLeftBeforeExpire(8).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
@@ -114,8 +112,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimitGivenNumberOfSecondsLeftBeforeExpire()
         {
-            _fixture.Configuration.NumberOfSecondsLeftBeforeExpire = 1;
-            var sut = _fixture.WithIdportenExpirationDuration(2).CreateSut();
+            var sut = _fixture.WithIdportenExpirationDuration(2).WithNumberOfSecondsLeftBeforeExpire(1).CreateSut();
 
             var token1 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromMilliseconds(1100)).ConfigureAwait(false);
@@ -180,8 +177,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task AssertionDeserializedHasCorrectAudience()
         {
             var expectedAudience = "testAudience";
-            _fixture.Configuration.Audience = expectedAudience;
-            var sut = _fixture.CreateSut();
+            var sut = _fixture.WithAudience(expectedAudience).CreateSut();
 
             await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
@@ -197,8 +193,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public async Task AssertionDeserializedHasCorrectIssuer()
         {
             var expectedIssuer = "testIssuer";
-            _fixture.Configuration.Issuer = expectedIssuer;
-            var sut = _fixture.CreateSut();
+            var sut = _fixture.WithIssuer(expectedIssuer).CreateSut();
 
             await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 

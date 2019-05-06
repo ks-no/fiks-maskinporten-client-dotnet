@@ -4,14 +4,28 @@ namespace Ks.Fiks.Maskinporten.Client
 {
     public class MaskinportenClientConfiguration
     {
-        public string Audience { get; set; }
+        public MaskinportenClientConfiguration(
+            string audience,
+            string tokenEndpoint,
+            string issuer,
+            int numberOfSecondsLeftBeforeExpire,
+            X509Certificate2 certificate)
+        {
+            Audience = audience;
+            TokenEndpoint = tokenEndpoint;
+            Issuer = issuer;
+            NumberOfSecondsLeftBeforeExpire = numberOfSecondsLeftBeforeExpire;
+            Certificate = certificate;
+        }
 
-        public string TokenEndpoint { get; set; }
+        public string Audience { get; }
 
-        public string Issuer { get; set; }
+        public string TokenEndpoint { get; }
 
-        public int NumberOfSecondsLeftBeforeExpire { get; set; }
+        public string Issuer { get; }
 
-        public X509Certificate2 Certificate { get; set; }
+        public int NumberOfSecondsLeftBeforeExpire { get; }
+
+        public X509Certificate2 Certificate { get; }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using JWT;
@@ -16,6 +17,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private HttpStatusCode _statusCode = HttpStatusCode.OK;
         private bool _useIncorrectCertificate = false;
         private long _expirationTime;
+        private string _tokenEndpoint = "http://test.no";
+        private int _numberOfSecondsLeftBeforeExpire = 1;
+        private string _audience = "testAudience";
+        private string _issuer = "testIssuer";
 
         public MaskinportenClientFixture()
         {
@@ -31,13 +36,34 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public MaskinportenClient CreateSut()
         {
             SetResponse();
-            Configuration.Certificate = _useIncorrectCertificate
-                ? TestHelper.CertificateOtherThanUsedForDecode
-                : TestHelper.Certificate;
-
+            SetDefaultProperties();
             return new MaskinportenClient(
                 Configuration,
                 new HttpClient(HttpMessageHandleMock.Object));
+        }
+
+        public MaskinportenClientFixture WithTokenEndpoint(string tokenEndpoint)
+        {
+            _tokenEndpoint = tokenEndpoint;
+            return this;
+        }
+
+        public MaskinportenClientFixture WithNumberOfSecondsLeftBeforeExpire(int number)
+        {
+            _numberOfSecondsLeftBeforeExpire = number;
+            return this;
+        }
+
+        public MaskinportenClientFixture WithAudience(string audience)
+        {
+            _audience = audience;
+            return this;
+        }
+
+        public MaskinportenClientFixture WithIssuer(string issuer)
+        {
+            _issuer = issuer;
+            return this;
         }
 
         public MaskinportenClientFixture WithStatusCode(HttpStatusCode statusCode)
@@ -61,20 +87,18 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         private void SetDefaultValues()
         {
-            SetDefaultProperties();
             _expirationTime = 120;
             DefaultScopes = new List<string>();
         }
 
         private void SetDefaultProperties()
         {
-            Configuration = new MaskinportenClientConfiguration
-            {
-                Audience = "testAudience",
-                TokenEndpoint = "http://test.no",
-                Issuer = "testIssuer",
-                NumberOfSecondsLeftBeforeExpire = 1
-            };
+            Configuration = new MaskinportenClientConfiguration(
+                 _audience,
+                 _tokenEndpoint,
+                 _issuer,
+                 _numberOfSecondsLeftBeforeExpire,
+                 _useIncorrectCertificate? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate);
         }
 
         private void SetResponse()

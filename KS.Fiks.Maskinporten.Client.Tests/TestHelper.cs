@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
 using JWT;
@@ -15,7 +16,7 @@ using Newtonsoft.Json;
 namespace Ks.Fiks.Maskinporten.Client.Tests
 {
     public static class TestHelper
-    {
+    {        
         private static readonly RSAlgorithmFactory _factory = new RSAlgorithmFactory(() => Certificate);
         private static readonly JsonNetSerializer _serializer = new JsonNetSerializer();
         private static readonly JwtValidator _validator = new JwtValidator(_serializer, new UtcDateTimeProvider());
@@ -25,7 +26,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         {
             var formData = request.Content.ReadAsStringAsync().Result;
             var query = HttpUtility.ParseQueryString(formData);
-
             return query.AllKeys.ToDictionary(t => t, t => query[t]);
         }
 
@@ -63,7 +63,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         public static string EncodeJwt(Dictionary<string, object> header, object payload)
         {
-            var encoder = new JwtEncoder(_factory.Create(JwtHashAlgorithm.RS256), _serializer, _urlEncoder);
+            var algorithm = _factory.Create(JwtHashAlgorithm.RS256);
+            var encoder = new JwtEncoder(algorithm, _serializer, _urlEncoder);
             return encoder.Encode(header, payload, "password");
         }
 
