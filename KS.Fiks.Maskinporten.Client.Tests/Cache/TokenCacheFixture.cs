@@ -12,7 +12,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests.Cache
         {
             _tokenString = @"{
             ""aud"": ""oidc_ks_test"",
-            ""scope"": ""ks"",
+            ""scope"": ""ks:fiks"",
             ""iss"": ""https://oidc-ver2.difi.no/idporten-oidc-provider/"",
             ""token_type"": ""Bearer"",
             ""exp"": 1550837855,
