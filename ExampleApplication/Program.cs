@@ -22,7 +22,7 @@ namespace ExampleApplication
             // Password required to use the certificate
             var p12Password = Environment.GetEnvironmentVariable("P12PWD");
             
-            // The issuer - for the KS Fiks test environment 
+            // The issuer as defined in Maskinporten
             var issuer = Environment.GetEnvironmentVariable("MASKINPORTEN_ISSUER");
 
             var configuration = new MaskinportenClientConfiguration(
