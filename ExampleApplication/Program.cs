@@ -32,8 +32,10 @@ namespace ExampleApplication
                 numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
                 certificate: new X509Certificate2(p12Filename, p12Password));
             var maskinportenClient = new MaskinportenClient(configuration);
+            
             var tokenTask = maskinportenClient.GetAccessToken("ks:fiks");
             tokenTask.Wait(TimeSpan.FromMinutes(2.0));
+            
             var token = tokenTask.Result;
 
             Console.Out.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
