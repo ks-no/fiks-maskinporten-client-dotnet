@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using JWT;
 using JWT.Serializers;
 using Ks.Fiks.Maskinporten.Client;
