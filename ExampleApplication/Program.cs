@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using JWT;
 using JWT.Serializers;
 using Ks.Fiks.Maskinporten.Client;
@@ -24,6 +25,7 @@ namespace ExampleApplication
             
             // The issuer as defined in Maskinporten
             var issuer = Environment.GetEnvironmentVariable("MASKINPORTEN_ISSUER");
+            
 
             var configuration = new MaskinportenClientConfiguration(
                 audience: @"https://oidc-ver2.difi.no/idporten-oidc-provider/", // ID-porten audience path
@@ -32,16 +34,17 @@ namespace ExampleApplication
                 numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
                 certificate: new X509Certificate2(p12Filename, p12Password));
             var maskinportenClient = new MaskinportenClient(configuration);
-            
-            var tokenTask = maskinportenClient.GetAccessToken("ks:fiks");
-            tokenTask.Wait(TimeSpan.FromMinutes(2.0));
-            
-            var token = tokenTask.Result;
 
-            Console.Out.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
-            
-            var decodedToken = DecodeToken(token);
-            Console.Out.WriteLine($"Decoded token {decodedToken}");
+            var tokenTask = maskinportenClient.GetAccessToken("ks:fiks").ContinueWith(t =>
+            {
+                var token = t.Result;
+                Console.Out.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
+
+                return DecodeToken(token);
+            });
+            // Do something with the token. In this case we only wait for it to be decoded and written to the console
+            tokenTask.GetAwaiter().GetResult();
+
 
         }
 
@@ -52,6 +55,7 @@ namespace ExampleApplication
 
             var jwtDecoder = new JwtDecoder(serializer, new JwtValidator(serializer, provider), new JwtBase64UrlEncoder());
             var decodedToken = jwtDecoder.Decode(token.Token);
+            Console.Out.WriteLine($"Decoded token {decodedToken}");
             return decodedToken;
         }
     }
