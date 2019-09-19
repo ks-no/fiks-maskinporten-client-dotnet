@@ -1,3 +1,3 @@
 dotnetLibPipeline{
-    componentTestProject = "fiks-maskinporten-client-dotnet-integration-test"
+    componentTestProject = "fiks-maskinporten-client-dotnet-integration-tests"
 }
