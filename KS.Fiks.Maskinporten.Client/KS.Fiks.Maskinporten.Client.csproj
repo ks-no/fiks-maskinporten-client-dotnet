@@ -14,7 +14,7 @@
         <PackageTags>FIKS</PackageTags>
         <VersionPrefix>1.0.1</VersionPrefix>
         <PackageIconUrl>https://ks-no.github.io/images/favicon.png</PackageIconUrl>
-        <TargetFrameworks>netstandard2.0;netcoreapp2.2</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;netcoreapp3.1</TargetFrameworks>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         
@@ -22,7 +22,7 @@
     <ItemGroup>
         <PackageReference Include="JWT" Version="5.0.1" />
         <PackageReference Include="KS.Fiks.QA" Version="1.0.0" PrivateAssets="All" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
 
 </Project>
