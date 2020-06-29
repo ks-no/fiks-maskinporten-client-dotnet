@@ -8,12 +8,12 @@
         <Copyright>Ks-Kommunesektorens Organisasjon</Copyright>
         <RootNamespace>KS.Fiks.Maskinporten.Client</RootNamespace>
         <PackageProjectUrl>https://github.com/ks-no/fiks-maskinporten-client-dotnet</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/ks-no/fiks-maskinporten-client-dotnet/raw/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/ks-no/fiks-maskinporten-client-dotnet.git</RepositoryUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageIcon>KS.png</PackageIcon>
         <RepositoryType>git</RepositoryType>
         <PackageTags>FIKS</PackageTags>
         <VersionPrefix>1.0.1</VersionPrefix>
-        <PackageIconUrl>https://ks-no.github.io/images/favicon.png</PackageIconUrl>
         <TargetFrameworks>netstandard2.1;netcoreapp3.1</TargetFrameworks>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -24,5 +24,14 @@
         <PackageReference Include="KS.Fiks.QA" Version="1.0.0" PrivateAssets="All" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
-
+    <ItemGroup>
+        <None Include="KS.png">
+            <Pack>true</Pack>
+            <PackagePath>/</PackagePath>
+        </None>
+        <None Include="../LICENSE">
+            <Pack>true</Pack>
+            <PackagePath>/</PackagePath>
+        </None>
+    </ItemGroup>
 </Project>
