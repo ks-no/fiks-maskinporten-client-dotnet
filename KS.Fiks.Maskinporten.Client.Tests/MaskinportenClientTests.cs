@@ -307,7 +307,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 "SendAsync",
                 Times.Exactly(1),
                 ItExpr.Is<HttpRequestMessage>(req =>
-                    req.Content.Headers.GetValues("consumer_org").Contains("consumerOrg")),
+                    req.Content.Headers.GetValues("consumer_org").Contains(consumerOrg)),
                 ItExpr.IsAny<CancellationToken>());
         }
         
