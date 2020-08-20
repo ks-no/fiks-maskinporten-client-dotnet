@@ -294,6 +294,37 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                     req.Content.Headers.GetValues("Charset").Contains("utf-8")),
                 ItExpr.IsAny<CancellationToken>());
         }
+        
+        [Fact]
+        public async Task SendsHeaderConsumerOrgIfSet()
+        {
+            var consumerOrg = "123456789";
+            var sut = _fixture.WithConsumerOrg(consumerOrg).CreateSut();
+
+            await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Content.Headers.GetValues("consumer_org").Contains(consumerOrg)),
+                ItExpr.IsAny<CancellationToken>());
+        }
+        
+        [Fact]
+        public async Task DoesNotSendHeaderConsumerOrgIfNotSet()
+        {
+            var sut = _fixture.WithConsumerOrg(null).CreateSut();
+
+            await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    !req.Content.Headers.Contains("consumer_org")),
+                ItExpr.IsAny<CancellationToken>());
+        }
 
         [Fact]
         public async Task SendsHeaderCorrectContentType()

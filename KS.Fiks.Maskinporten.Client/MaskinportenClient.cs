@@ -90,6 +90,11 @@ namespace Ks.Fiks.Maskinporten.Client
                 new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(scopes, _configuration))
             });
 
+            if (_configuration.ConsumerOrg != null)
+            {
+                content.Headers.Add("consumer_org", _configuration.ConsumerOrg);
+            }
+            
             content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeFromUrl);
             content.Headers.Add("Charset", CharsetUtf8);
 
