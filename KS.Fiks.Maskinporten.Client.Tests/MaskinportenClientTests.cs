@@ -320,9 +320,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
             _fixture.HttpMessageHandleMock.Protected().Verify(
                 "SendAsync",
-                Times.Exactly(0),
+                Times.Exactly(1),
                 ItExpr.Is<HttpRequestMessage>(req =>
-                    req.Content.Headers.HasValue("consumer_org")),
+                    !req.Content.Headers.Contains("consumer_org")),
                 ItExpr.IsAny<CancellationToken>());
         }
 
