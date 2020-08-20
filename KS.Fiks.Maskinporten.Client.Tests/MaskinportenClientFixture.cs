@@ -21,6 +21,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private int _numberOfSecondsLeftBeforeExpire = 1;
         private string _audience = "testAudience";
         private string _issuer = "testIssuer";
+        private string? _consumerOrg = null;
 
         public MaskinportenClientFixture()
         {
@@ -65,6 +66,12 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             _issuer = issuer;
             return this;
         }
+        
+        public MaskinportenClientFixture WithConsumerOrg(string consumerOrg)
+        {
+            _consumerOrg = consumerOrg;
+            return this;
+        }
 
         public MaskinportenClientFixture WithStatusCode(HttpStatusCode statusCode)
         {
@@ -98,7 +105,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                  _tokenEndpoint,
                  _issuer,
                  _numberOfSecondsLeftBeforeExpire,
-                 _useIncorrectCertificate? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate);
+                 _useIncorrectCertificate? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate,
+                 _consumerOrg);
         }
 
         private void SetResponse()
