@@ -17,7 +17,8 @@ var maskinportenConfig = new MaskinportenClientConfiguration(
     tokenEndpoint: @"https://oidc-ver2.difi.no/idporten-oidc-provider/token", // ID-porten token path
     issuer: @"oidc_ks_test",  // Issuer name
     numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
-    certificate: /* virksomhetssertifikat as a X509Certificate2  */);
+    certificate: /* virksomhetssertifikat as a X509Certificate2  */,
+    consumerOrg: /* optional value. Sets header consumer_org*);
 ```
 ### Create instance of MaskinportenClient
 ```c#
