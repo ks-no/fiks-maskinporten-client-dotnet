@@ -56,7 +56,7 @@ namespace Ks.Fiks.Maskinporten.Client
             return JsonConvert.DeserializeObject<MaskinportenResponse>(responseAsJson);
         }
 
-        private string ScopesAsString(IEnumerable<string> scopes)
+        private static string ScopesAsString(IEnumerable<string> scopes)
         {
             return string.Join(" ", scopes);
         }
