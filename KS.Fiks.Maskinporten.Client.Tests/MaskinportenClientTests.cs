@@ -76,6 +76,24 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         }
 
         [Fact]
+        public async Task DoesNotSendDelegatedAccessTokenRequestTwiceIfSecondCallIsWithinTimelimit()
+        {
+            const string consumerOrg = "999888999";
+            var sut = _fixture.CreateSut();
+
+            var token1 = await sut.GetDelegatedAccessToken(consumerOrg, _fixture.DefaultScopes).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+            var token2 = await sut.GetDelegatedAccessToken(consumerOrg, _fixture.DefaultScopes).ConfigureAwait(false);
+
+            token1.Should().Be(token2);
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req => true),
+                ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
         public async Task SendsRequestTwiceIfSecondCallIsOutsideTimelimit()
         {
             var sut = _fixture.WithIdportenExpirationDuration(1).CreateSut();
@@ -294,7 +312,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                     req.Content.Headers.GetValues("Charset").Contains("utf-8")),
                 ItExpr.IsAny<CancellationToken>());
         }
-        
+
         [Fact]
         public async Task SendsHeaderConsumerOrgIfSet()
         {
@@ -310,7 +328,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                     req.Content.Headers.GetValues("consumer_org").Contains(consumerOrg)),
                 ItExpr.IsAny<CancellationToken>());
         }
-        
+
         [Fact]
         public async Task DoesNotSendHeaderConsumerOrgIfNotSet()
         {
