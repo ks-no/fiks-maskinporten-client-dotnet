@@ -8,23 +8,23 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 {
     public class TokenCache : ITokenCache, IDisposable
     {
-        private readonly Dictionary<string, MaskinportenToken> _cacheDictionary;
+        private readonly Dictionary<TokenRequest, MaskinportenToken> _cacheDictionary;
         private readonly SemaphoreSlim _mutex;
 
         public TokenCache()
         {
-            _cacheDictionary = new Dictionary<string, MaskinportenToken>();
+            _cacheDictionary = new Dictionary<TokenRequest, MaskinportenToken>();
             _mutex = new SemaphoreSlim(1);
         }
 
-        public async Task<MaskinportenToken> GetToken(string tokenKey, Func<Task<MaskinportenToken>> tokenFactory)
+        public async Task<MaskinportenToken> GetToken(TokenRequest tokenRequest, Func<Task<MaskinportenToken>> tokenFactory)
         {
             await _mutex.WaitAsync().ConfigureAwait(false);
             try
             {
-                return HasValidEntry(tokenKey)
-                    ? _cacheDictionary[tokenKey]
-                    : await UpdateOrAddToken(tokenKey, tokenFactory).ConfigureAwait(false);
+                return HasValidEntry(tokenRequest)
+                    ? _cacheDictionary[tokenRequest]
+                    : await UpdateOrAddToken(tokenRequest, tokenFactory).ConfigureAwait(false);
             }
             finally
             {
@@ -46,31 +46,32 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
             }
         }
 
-        private bool HasValidEntry(string tokenKey)
+        private bool HasValidEntry(TokenRequest tokenRequest)
         {
-            if (!_cacheDictionary.ContainsKey(tokenKey))
+            if (!_cacheDictionary.ContainsKey(tokenRequest))
             {
                 return false;
             }
 
-            return !_cacheDictionary[tokenKey].IsExpiring();
+            return !_cacheDictionary[tokenRequest].IsExpiring();
         }
 
         private async Task<MaskinportenToken> UpdateOrAddToken(
-            string tokenKey,
+            TokenRequest tokenRequest,
             Func<Task<MaskinportenToken>> tokenFactory)
         {
             var newToken = await tokenFactory().ConfigureAwait(false);
-            if (_cacheDictionary.ContainsKey(tokenKey))
+            if (_cacheDictionary.ContainsKey(tokenRequest))
             {
-                _cacheDictionary[tokenKey] = newToken;
+                _cacheDictionary[tokenRequest] = newToken;
             }
             else
             {
-                _cacheDictionary.Add(tokenKey, newToken);
+                _cacheDictionary.Add(tokenRequest, newToken);
             }
 
             return newToken;
         }
     }
+
 }

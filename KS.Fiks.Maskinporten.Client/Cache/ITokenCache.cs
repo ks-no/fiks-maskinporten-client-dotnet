@@ -5,6 +5,6 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 {
     public interface ITokenCache
     {
-        Task<MaskinportenToken> GetToken(string tokenKey, Func<Task<MaskinportenToken>> tokenGetter);
+        Task<MaskinportenToken> GetToken(TokenRequest tokenRequest, Func<Task<MaskinportenToken>> tokenGetter);
     }
 }

@@ -44,10 +44,32 @@ namespace Ks.Fiks.Maskinporten.Client
 
         public async Task<MaskinportenToken> GetAccessToken(string scopes)
         {
-            return await _tokenCache.GetToken(
-                                        scopes,
-                                        async () => await GetNewAccessToken(scopes).ConfigureAwait(false))
-                                    .ConfigureAwait(false);
+            var tokenRequest = new TokenRequest
+            {
+                Scopes = scopes
+            };
+            return await GetAccessTokenForRequest(tokenRequest);
+        }
+
+        public async Task<MaskinportenToken> GetDelegatedAccessToken(string consumerOrg, IEnumerable<string> scopes)
+        {
+            return await GetDelegatedAccessToken(consumerOrg, ScopesAsString(scopes)).ConfigureAwait(false);
+        }
+
+        public async Task<MaskinportenToken> GetDelegatedAccessToken(string consumerOrg, string scopes)
+        {
+            return await GetAccessTokenForRequest(new TokenRequest
+            {
+                Scopes = scopes,
+                ConsumerOrg = consumerOrg
+            }).ConfigureAwait(false);
+        }
+
+        private async Task<MaskinportenToken> GetAccessTokenForRequest(TokenRequest tokenRequest)
+        {
+            return await this._tokenCache.GetToken(tokenRequest,
+                async () => await GetNewAccessToken(tokenRequest).ConfigureAwait(false)
+            ).ConfigureAwait(false);
         }
 
         private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
@@ -61,10 +83,10 @@ namespace Ks.Fiks.Maskinporten.Client
             return string.Join(" ", scopes);
         }
 
-        private async Task<MaskinportenToken> GetNewAccessToken(string scopes)
+        private async Task<MaskinportenToken> GetNewAccessToken(TokenRequest tokenRequest)
         {
             SetRequestHeaders();
-            var requestContent = CreateRequestContent(scopes);
+            var requestContent = CreateRequestContent(tokenRequest);
 
             var tokenUri = new Uri(_configuration.TokenEndpoint);
             var response = await _httpClient.PostAsync(tokenUri, requestContent).ConfigureAwait(false);
@@ -82,19 +104,20 @@ namespace Ks.Fiks.Maskinporten.Client
             };
         }
 
-        private FormUrlEncodedContent CreateRequestContent(string scopes)
+        private FormUrlEncodedContent CreateRequestContent(TokenRequest tokenRequest)
         {
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
             {
                 new KeyValuePair<string, string>("grant_type", GrantType),
-                new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(scopes, _configuration))
+                new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(tokenRequest.Scopes, _configuration))
             });
 
-            if (_configuration.ConsumerOrg != null)
+            var consumerOrg = tokenRequest.ConsumerOrg ?? this._configuration.ConsumerOrg;
+            if (consumerOrg != null)
             {
-                content.Headers.Add("consumer_org", _configuration.ConsumerOrg);
+                content.Headers.Add("consumer_org", consumerOrg);
             }
-            
+
             content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeFromUrl);
             content.Headers.Add("Charset", CharsetUtf8);
 
