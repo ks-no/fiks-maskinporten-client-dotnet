@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Ks.Fiks.Maskinporten.Client.Cache;
 using Ks.Fiks.Maskinporten.Client.Jwt;
@@ -21,7 +19,6 @@ namespace Ks.Fiks.Maskinporten.Client
         private readonly HttpClient _httpClient;
 
         private readonly IJwtRequestTokenGenerator _tokenGenerator;
-        private readonly IJwtResponseDecoder _responseDecoder;
 
         private readonly ITokenCache _tokenCache;
 
@@ -33,7 +30,6 @@ namespace Ks.Fiks.Maskinporten.Client
             _httpClient = httpClient ?? new HttpClient();
             _tokenCache = new TokenCache();
             _tokenGenerator = new JwtRequestTokenGenerator(_configuration.Certificate);
-            _responseDecoder = new JwtResponseDecoder();
         }
 
         public async Task<MaskinportenToken> GetAccessToken(IEnumerable<string> scopes)

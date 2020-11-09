@@ -287,7 +287,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var sut = _fixture.WithIncorrectCertificate().CreateSut();
 
             await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
-            Assert.Throws<JWT.SignatureVerificationException>(() =>
+            Assert.Throws<JWT.Exceptions.SignatureVerificationException>(() =>
             {
                 _fixture.HttpMessageHandleMock.Protected().Verify(
                     "SendAsync",
