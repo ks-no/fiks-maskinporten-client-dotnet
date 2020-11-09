@@ -44,7 +44,7 @@ namespace Ks.Fiks.Maskinporten.Client
             {
                 Scopes = scopes
             };
-            return await GetAccessTokenForRequest(tokenRequest);
+            return await GetAccessTokenForRequest(tokenRequest).ConfigureAwait(false);
         }
 
         public async Task<MaskinportenToken> GetDelegatedAccessToken(string consumerOrg, IEnumerable<string> scopes)
@@ -63,9 +63,9 @@ namespace Ks.Fiks.Maskinporten.Client
 
         private async Task<MaskinportenToken> GetAccessTokenForRequest(TokenRequest tokenRequest)
         {
-            return await this._tokenCache.GetToken(tokenRequest,
-                async () => await GetNewAccessToken(tokenRequest).ConfigureAwait(false)
-            ).ConfigureAwait(false);
+            return await this._tokenCache.GetToken(
+                tokenRequest,
+                async () => await GetNewAccessToken(tokenRequest).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)

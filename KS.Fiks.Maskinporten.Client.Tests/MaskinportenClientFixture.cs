@@ -1,12 +1,9 @@
-using System;
+#nullable enable
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using JWT;
-using JWT.Builder;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json.Linq;
@@ -67,7 +64,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             _issuer = issuer;
             return this;
         }
-        
+
         public MaskinportenClientFixture WithConsumerOrg(string consumerOrg)
         {
             _consumerOrg = consumerOrg;

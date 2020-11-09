@@ -73,5 +73,4 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
             return newToken;
         }
     }
-
 }

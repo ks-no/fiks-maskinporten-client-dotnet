@@ -16,6 +16,20 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
         private readonly JwtEncoder _encoder;
         private readonly X509Certificate2 _certificate;
 
+        private static IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientConfiguration configuration)
+        {
+            var jwtData = new JwtData();
+
+            jwtData.Payload.Add("iss", configuration.Issuer);
+            jwtData.Payload.Add("aud", configuration.Audience);
+            jwtData.Payload.Add("iat", UnixEpoch.GetSecondsSince(DateTime.UtcNow));
+            jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddMinutes(JwtExpireTimeInMinutes)));
+            jwtData.Payload.Add("scope", scope);
+            jwtData.Payload.Add("jti", Guid.NewGuid());
+
+            return jwtData.Payload;
+        }
+
         public JwtRequestTokenGenerator(X509Certificate2 certificate)
         {
             _certificate = certificate;
@@ -43,20 +57,6 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
                     new List<string>() { Convert.ToBase64String(_certificate.Export(X509ContentType.Cert)) }
                 }
             };
-        }
-
-        private static IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientConfiguration configuration)
-        {
-            var jwtData = new JwtData();
-
-            jwtData.Payload.Add("iss", configuration.Issuer);
-            jwtData.Payload.Add("aud", configuration.Audience);
-            jwtData.Payload.Add("iat", UnixEpoch.GetSecondsSince(DateTime.UtcNow));
-            jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddMinutes(JwtExpireTimeInMinutes)));
-            jwtData.Payload.Add("scope", scope);
-            jwtData.Payload.Add("jti", Guid.NewGuid());
-
-            return jwtData.Payload;
         }
     }
 }
