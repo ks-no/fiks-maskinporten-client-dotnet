@@ -20,7 +20,7 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
                 return true;
             }
 
-            return obj.GetType() == GetType() && Equals((TokenRequest) obj);
+            return obj.GetType() == GetType() && Equals((TokenRequest)obj);
         }
 
         public override int GetHashCode()

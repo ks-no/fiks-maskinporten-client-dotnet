@@ -1,11 +1,9 @@
-using System;
+#nullable enable
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using JWT;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json.Linq;
@@ -66,7 +64,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             _issuer = issuer;
             return this;
         }
-        
+
         public MaskinportenClientFixture WithConsumerOrg(string consumerOrg)
         {
             _consumerOrg = consumerOrg;
@@ -144,12 +142,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 {"client_orgno", "987654321"},
                 {"jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY="}
             };
-            var tokenHeader = new Dictionary<string, object>
-            {
-                {"kid", "mqT5A3LOSIHbpKrscb3EHGrr-WIFRfLdaqZ_5J9GR9s"}
-            };
-            var encodedToken = TestHelper.EncodeJwt(tokenHeader, tokenResponse);
-
+            var encodedToken = TestHelper.EncodeJwt("mqT5A3LOSIHbpKrscb3EHGrr-WIFRfLdaqZ_5J9GR9s", tokenResponse);
             response.Add("access_token", encodedToken);
             return response.ToString();
         }

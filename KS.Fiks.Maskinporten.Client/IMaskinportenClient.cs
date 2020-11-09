@@ -10,6 +10,7 @@ namespace Ks.Fiks.Maskinporten.Client
         Task<MaskinportenToken> GetAccessToken(string scopes);
 
         Task<MaskinportenToken> GetDelegatedAccessToken(string consumerOrg, IEnumerable<string> scopes);
+
         Task<MaskinportenToken> GetDelegatedAccessToken(string consumerOrg, string scopes);
     }
 }

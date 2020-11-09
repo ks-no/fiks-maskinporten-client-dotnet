@@ -25,7 +25,7 @@ namespace Ks.Fiks.Maskinporten.Client
         public string TokenEndpoint { get; }
 
         public string Issuer { get; }
-        
+
         public string ConsumerOrg { get; }
 
         public int NumberOfSecondsLeftBeforeExpire { get; }

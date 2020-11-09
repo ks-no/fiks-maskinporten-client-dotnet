@@ -61,11 +61,24 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             return DeserializedFieldInJwt<string>(request, jwtFieldName, field);
         }
 
-        public static string EncodeJwt(Dictionary<string, object> header, object payload)
+        public static string EncodeJwt(string keyId, Dictionary<string, object> claims)
         {
-            var algorithm = _factory.Create(JwtHashAlgorithm.RS256);
-            var encoder = new JwtEncoder(algorithm, _serializer, _urlEncoder);
-            return encoder.Encode(header, payload, "password");
+
+            var builder = new JwtBuilder()
+                .WithAlgorithmFactory(_factory)
+                .WithAlgorithm(new RS256Algorithm(Certificate))
+                .WithSerializer(_serializer)
+                .WithValidator(_validator)
+                .WithSecret("passord")
+                .AddHeader(HeaderName.KeyId, keyId);
+
+            foreach (var (key, value) in claims)
+            {
+                builder.AddClaim(key, value);
+            }
+
+            return builder.Encode();
+
         }
 
         public static T DeserializedFieldInJwt<T>(HttpRequestMessage request, string jwtFieldName, string field)

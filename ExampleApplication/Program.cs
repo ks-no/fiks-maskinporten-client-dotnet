@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using JWT;
+using JWT.Algorithms;
 using JWT.Serializers;
 using Ks.Fiks.Maskinporten.Client;
 
@@ -24,14 +26,14 @@ namespace ExampleApplication
             
             // The issuer as defined in Maskinporten
             var issuer = Environment.GetEnvironmentVariable("MASKINPORTEN_ISSUER");
-            
 
+            var cert = new X509Certificate2(p12Filename, p12Password);
             var configuration = new MaskinportenClientConfiguration(
                 audience: @"https://oidc-ver2.difi.no/idporten-oidc-provider/", // ID-porten audience path
                 tokenEndpoint: @"https://oidc-ver2.difi.no/idporten-oidc-provider/token", // ID-porten token path
                 issuer: issuer, // Issuer name
                 numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
-                certificate: new X509Certificate2(p12Filename, p12Password));
+                certificate: cert);
             var maskinportenClient = new MaskinportenClient(configuration);
 
             var tokenTask = maskinportenClient.GetAccessToken("ks:fiks").ContinueWith(t =>
@@ -39,7 +41,7 @@ namespace ExampleApplication
                 var token = t.Result;
                 Console.Out.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
 
-                return DecodeToken(token);
+                return DecodeToken(token, cert);
             });
             // Do something with the token. In this case we only wait for it to be decoded and written to the console
             tokenTask.GetAwaiter().GetResult();
@@ -47,12 +49,12 @@ namespace ExampleApplication
 
         }
 
-        private static string DecodeToken(MaskinportenToken token)
+        private static string DecodeToken(MaskinportenToken token, X509Certificate2 pubprivCertificate)
         {
             var serializer = new JsonNetSerializer();
             var provider = new UtcDateTimeProvider();
 
-            var jwtDecoder = new JwtDecoder(serializer, new JwtValidator(serializer, provider), new JwtBase64UrlEncoder());
+            var jwtDecoder = new JwtDecoder(serializer, new JwtValidator(serializer, provider), new JwtBase64UrlEncoder(), new RS256Algorithm(pubprivCertificate));
             var decodedToken = jwtDecoder.Decode(token.Token);
             Console.Out.WriteLine($"Decoded token {decodedToken}");
             return decodedToken;

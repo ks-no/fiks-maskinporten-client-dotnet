@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Ks.Fiks.Maskinporten.Client.Cache;
 using Ks.Fiks.Maskinporten.Client.Jwt;
@@ -21,7 +19,6 @@ namespace Ks.Fiks.Maskinporten.Client
         private readonly HttpClient _httpClient;
 
         private readonly IJwtRequestTokenGenerator _tokenGenerator;
-        private readonly IJwtResponseDecoder _responseDecoder;
 
         private readonly ITokenCache _tokenCache;
 
@@ -33,7 +30,6 @@ namespace Ks.Fiks.Maskinporten.Client
             _httpClient = httpClient ?? new HttpClient();
             _tokenCache = new TokenCache();
             _tokenGenerator = new JwtRequestTokenGenerator(_configuration.Certificate);
-            _responseDecoder = new JwtResponseDecoder();
         }
 
         public async Task<MaskinportenToken> GetAccessToken(IEnumerable<string> scopes)
@@ -48,7 +44,7 @@ namespace Ks.Fiks.Maskinporten.Client
             {
                 Scopes = scopes
             };
-            return await GetAccessTokenForRequest(tokenRequest);
+            return await GetAccessTokenForRequest(tokenRequest).ConfigureAwait(false);
         }
 
         public async Task<MaskinportenToken> GetDelegatedAccessToken(string consumerOrg, IEnumerable<string> scopes)
@@ -67,9 +63,9 @@ namespace Ks.Fiks.Maskinporten.Client
 
         private async Task<MaskinportenToken> GetAccessTokenForRequest(TokenRequest tokenRequest)
         {
-            return await this._tokenCache.GetToken(tokenRequest,
-                async () => await GetNewAccessToken(tokenRequest).ConfigureAwait(false)
-            ).ConfigureAwait(false);
+            return await this._tokenCache.GetToken(
+                tokenRequest,
+                async () => await GetNewAccessToken(tokenRequest).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         private static async Task<MaskinportenResponse> ReadResponse(HttpResponseMessage responseMessage)
