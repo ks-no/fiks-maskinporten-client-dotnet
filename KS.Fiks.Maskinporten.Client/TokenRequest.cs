@@ -25,7 +25,7 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Scopes, ConsumerOrg);
+            return (Scopes, ConsumerOrg).GetHashCode();
         }
 
         private bool Equals(TokenRequest other)
