@@ -10,7 +10,7 @@ namespace Ks.Fiks.Maskinporten.Client
             string issuer,
             int numberOfSecondsLeftBeforeExpire,
             X509Certificate2 certificate,
-            string? consumerOrg = null)
+            string consumerOrg = null)
         {
             Audience = audience;
             TokenEndpoint = tokenEndpoint;
@@ -26,7 +26,7 @@ namespace Ks.Fiks.Maskinporten.Client
 
         public string Issuer { get; }
         
-        public string? ConsumerOrg { get; }
+        public string ConsumerOrg { get; }
 
         public int NumberOfSecondsLeftBeforeExpire { get; }
 
