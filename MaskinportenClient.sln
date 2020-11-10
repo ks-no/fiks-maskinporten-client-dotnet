@@ -1,10 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KS.Fiks.Maskinporten.Client", "KS.Fiks.Maskinporten.Client\KS.Fiks.Maskinporten.Client.csproj", "{F94E2A6A-2AB3-4A25-8F44-9666ABE47126}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KS.Fiks.Maskinporten.Client", "KS.Fiks.Maskinporten.Client\KS.Fiks.Maskinporten.Client.csproj", "{F94E2A6A-2AB3-4A25-8F44-9666ABE47126}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KS.Fiks.Maskinporten.Client.Tests", "KS.Fiks.Maskinporten.Client.Tests\KS.Fiks.Maskinporten.Client.Tests.csproj", "{539576C9-1243-4DDC-A81F-D9CC0C36715B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KS.Fiks.Maskinporten.Client.Tests", "KS.Fiks.Maskinporten.Client.Tests\KS.Fiks.Maskinporten.Client.Tests.csproj", "{539576C9-1243-4DDC-A81F-D9CC0C36715B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleApplication", "ExampleApplication\ExampleApplication.csproj", "{F3086324-A728-465A-81FE-9E2783461528}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleApplication", "ExampleApplication\ExampleApplication.csproj", "{F3086324-A728-465A-81FE-9E2783461528}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KS.Fiks.Maskinporten.Client.NETFramework.Tests", "KS.Fiks.Maskinporten.Client.NETFramework.Tests\KS.Fiks.Maskinporten.Client.NETFramework.Tests.csproj", "{258BBA75-CE1B-4FD3-9300-822730ADC59D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +29,15 @@ Global
 		{F3086324-A728-465A-81FE-9E2783461528}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3086324-A728-465A-81FE-9E2783461528}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3086324-A728-465A-81FE-9E2783461528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{258BBA75-CE1B-4FD3-9300-822730ADC59D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{258BBA75-CE1B-4FD3-9300-822730ADC59D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{258BBA75-CE1B-4FD3-9300-822730ADC59D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{258BBA75-CE1B-4FD3-9300-822730ADC59D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8BC2E75F-E6C7-45F1-921F-9DA93558AFD4}
 	EndGlobalSection
 EndGlobal

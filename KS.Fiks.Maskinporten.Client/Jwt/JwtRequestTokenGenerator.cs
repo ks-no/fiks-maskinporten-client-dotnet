@@ -34,7 +34,7 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
         {
             _certificate = certificate;
             _encoder = new JwtEncoder(
-                new RS256Algorithm(_certificate),
+                new RS256Algorithm(_certificate.GetRSAPublicKey(), _certificate.GetRSAPrivateKey()),
                 new JsonNetSerializer(),
                 new JwtBase64UrlEncoder());
         }

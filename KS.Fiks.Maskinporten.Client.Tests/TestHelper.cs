@@ -66,15 +66,15 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
             var builder = new JwtBuilder()
                 .WithAlgorithmFactory(_factory)
-                .WithAlgorithm(new RS256Algorithm(Certificate))
+                .WithAlgorithm(new RS256Algorithm(Certificate.GetRSAPublicKey(), Certificate.GetRSAPrivateKey()))
                 .WithSerializer(_serializer)
                 .WithValidator(_validator)
                 .WithSecret("passord")
                 .AddHeader(HeaderName.KeyId, keyId);
 
-            foreach (var (key, value) in claims)
+            foreach (var kvp in claims)
             {
-                builder.AddClaim(key, value);
+                builder.AddClaim(kvp.Key, kvp.Value);
             }
 
             return builder.Encode();

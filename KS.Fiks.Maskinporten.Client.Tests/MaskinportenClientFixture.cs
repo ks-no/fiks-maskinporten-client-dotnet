@@ -1,5 +1,6 @@
-#nullable enable
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -19,7 +20,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private int _numberOfSecondsLeftBeforeExpire = 1;
         private string _audience = "testAudience";
         private string _issuer = "testIssuer";
-        private string? _consumerOrg = null;
+        private string _consumerOrg = null;
 
         public MaskinportenClientFixture()
         {
@@ -32,9 +33,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         public List<string> DefaultScopes { get; private set; }
 
-        public MaskinportenClient CreateSut()
+        public MaskinportenClient CreateSut(Expression<Func<HttpRequestMessage, bool>> match = null)
         {
-            SetResponse();
+            SetResponse(match);
             SetDefaultProperties();
             return new MaskinportenClient(
                 Configuration,
@@ -107,7 +108,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                  _consumerOrg);
         }
 
-        private void SetResponse()
+        private void SetResponse(Expression<Func<HttpRequestMessage, bool>> match)
         {
             var responseMessage = new HttpResponseMessage()
             {
@@ -116,14 +117,26 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             };
 
             HttpMessageHandleMock = new Mock<HttpMessageHandler>();
-            HttpMessageHandleMock
-                .Protected()
-                .Setup<Task<HttpResponseMessage>>(
-                    "SendAsync",
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(responseMessage)
-                .Verifiable();
+            if (match == null)
+            {
+                HttpMessageHandleMock
+                    .Protected()
+                    .Setup<Task<HttpResponseMessage>>(
+                        "SendAsync",
+                        ItExpr.IsAny<HttpRequestMessage>(),
+                        ItExpr.IsAny<CancellationToken>())
+                    .ReturnsAsync(responseMessage);
+            }
+            else
+            {
+                HttpMessageHandleMock
+                    .Protected()
+                    .Setup<Task<HttpResponseMessage>>(
+                        "SendAsync",
+                        ItExpr.Is(match),
+                        ItExpr.IsAny<CancellationToken>())
+                    .ReturnsAsync(responseMessage);
+            }
         }
 
         private string GenerateJsonResponse()
