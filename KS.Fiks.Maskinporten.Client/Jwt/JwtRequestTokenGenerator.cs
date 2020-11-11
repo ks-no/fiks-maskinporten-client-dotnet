@@ -13,8 +13,8 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
         private const int JwtExpireTimeInMinutes = 2;
         private const string DummyKey = ""; // Required by encoder, but not used with RS256Algorithm
 
-        private readonly JwtEncoder _encoder;
-        private readonly X509Certificate2 _certificate;
+        private readonly JwtEncoder encoder;
+        private readonly X509Certificate2 certificate;
 
         private static IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientConfiguration configuration)
         {
@@ -32,9 +32,9 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 
         public JwtRequestTokenGenerator(X509Certificate2 certificate)
         {
-            _certificate = certificate;
-            _encoder = new JwtEncoder(
-                new RS256Algorithm(_certificate),
+            this.certificate = certificate;
+            this.encoder = new JwtEncoder(
+                new RS256Algorithm(this.certificate.GetRSAPublicKey(), this.certificate.GetRSAPrivateKey()),
                 new JsonNetSerializer(),
                 new JwtBase64UrlEncoder());
         }
@@ -43,7 +43,7 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
         {
             var payload = CreateJwtPayload(scope, configuration);
             var header = CreateJwtHeader();
-            var jwt = _encoder.Encode(header, payload, DummyKey);
+            var jwt = this.encoder.Encode(header, payload, DummyKey);
 
             return jwt;
         }
@@ -54,7 +54,7 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
             {
                 {
                     "x5c",
-                    new List<string>() { Convert.ToBase64String(_certificate.Export(X509ContentType.Cert)) }
+                    new List<string>() { Convert.ToBase64String(this.certificate.Export(X509ContentType.Cert)) }
                 }
             };
         }
