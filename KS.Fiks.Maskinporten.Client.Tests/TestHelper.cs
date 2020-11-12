@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
 using JWT;
@@ -12,15 +9,18 @@ using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Serializers;
 using Newtonsoft.Json;
+using NLog;
+using NLog.Fluent;
 
 namespace Ks.Fiks.Maskinporten.Client.Tests
 {
     public static class TestHelper
-    {        
+    {
         private static readonly RSAlgorithmFactory _factory = new RSAlgorithmFactory(() => Certificate);
         private static readonly JsonNetSerializer _serializer = new JsonNetSerializer();
         private static readonly JwtValidator _validator = new JwtValidator(_serializer, new UtcDateTimeProvider());
         private static readonly JwtBase64UrlEncoder _urlEncoder = new JwtBase64UrlEncoder();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         public static Dictionary<string, string> RequestContentAsDictionary(HttpRequestMessage request)
         {
@@ -51,7 +51,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine($"Could not decode: {ex.Message}");
+                log.Warn().Exception(ex).Message("Could not decode JWT").Write();
                 return false;
             }
         }
@@ -78,7 +78,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             }
 
             return builder.Encode();
-
         }
 
         public static T DeserializedFieldInJwt<T>(HttpRequestMessage request, string jwtFieldName, string field)
