@@ -21,7 +21,7 @@
         
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="JWT" Version="7.3.0" />
+        <PackageReference Include="JWT" Version="8.1.5" />
         <PackageReference Include="KS.Fiks.QA" Version="1.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
