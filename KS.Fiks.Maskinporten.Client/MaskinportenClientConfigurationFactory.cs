@@ -10,7 +10,7 @@ namespace Ks.Fiks.Maskinporten.Client
         public const string PROD_TOKEN_ENDPOINT = "https://maskinporten.no/token";
         private const int DEFAULT_NUMBER_SECONDS_LEFT = 10;
 
-        public static MaskinportenClientConfiguration createVer2Configuration(
+        public static MaskinportenClientConfiguration CreateVer2Configuration(
             string issuer,
             X509Certificate2 certificate,
             int numberOfSecondsLeftBeforeExpire = DEFAULT_NUMBER_SECONDS_LEFT,
@@ -21,7 +21,7 @@ namespace Ks.Fiks.Maskinporten.Client
                 consumerOrg);
         }
 
-        public static MaskinportenClientConfiguration createProdConfiguration(
+        public static MaskinportenClientConfiguration CreateProdConfiguration(
             string issuer,
             X509Certificate2 certificate,
             int numberOfSecondsLeftBeforeExpire = DEFAULT_NUMBER_SECONDS_LEFT,

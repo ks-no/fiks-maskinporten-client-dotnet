@@ -14,9 +14,9 @@ Install [KS.Fiks.Maskinporten.Client](https://www.nuget.org/packages/KS.Fiks.Mas
 #### Using factory for VER2 and PROD environments
 ```c#
 // For VER2 (test)
-var maskinportenConfigVer2 = MaskinportenClientConfigurationFactory.createVer2Configuration("ver2_issuer", testCertificate);
+var maskinportenConfigVer2 = MaskinportenClientConfigurationFactory.CreateVer2Configuration("ver2_issuer", testCertificate);
 // For PROD
-var maskinportenConfigProd = MaskinportenClientConfigurationFactory.createProdConfiguration("prod_issuer", certificate);
+var maskinportenConfigProd = MaskinportenClientConfigurationFactory.CreateProdConfiguration("prod_issuer", certificate);
 ```
 #### Complete configuration
 ```c#
