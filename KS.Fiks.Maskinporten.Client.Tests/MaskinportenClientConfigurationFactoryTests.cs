@@ -10,7 +10,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         {
             const string issuer = "issuer";
             var certificate = TestHelper.Certificate;
-            var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.createVer2Configuration(issuer, certificate);
+            var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(issuer, certificate);
             maskinportenClientConfiguration.TokenEndpoint.Should()
                 .Be(MaskinportenClientConfigurationFactory.VER2_TOKEN_ENDPOINT);
             maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.VER2_AUDIENCE);
@@ -23,7 +23,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         {
             const string issuer = "issuer";
             var certificate = TestHelper.Certificate;
-            var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.createProdConfiguration(issuer, certificate);
+            var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateProdConfiguration(issuer, certificate);
             maskinportenClientConfiguration.TokenEndpoint.Should()
                 .Be(MaskinportenClientConfigurationFactory.PROD_TOKEN_ENDPOINT);
             maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.PROD_AUDIENCE);

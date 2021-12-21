@@ -22,7 +22,6 @@
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>maskinporten.snk</AssemblyOriginatorKeyFile>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="JWT" Version="8.7.0" />
@@ -40,10 +39,5 @@
             <PackagePath>/</PackagePath>
         </None>
     </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <None Include="../README.md">
-            <Pack>true</Pack>
-            <PackagePath>/</PackagePath>
-        </None>       
-    </ItemGroup>
+
 </Project>
