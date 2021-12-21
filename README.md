@@ -1,6 +1,6 @@
 # fiks-maskinporten-dotnet
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ks-no/fiks-io-client-dotnet/blob/master/LICENSE)
-[![Nuget](https://img.shields.io/nuget/vpre/KS.fiks.maskinporten.client.svg)](https://www.nuget.org/packages/KS.Fiks.Maskinporten.Client)
+[![Nuget](https://img.shields.io/nuget/v/KS.fiks.maskinporten.client.svg)](https://www.nuget.org/packages/KS.Fiks.Maskinporten.Client)
 [![GitHub issues](https://img.shields.io/github/issues-raw/ks-no/kryptering-dotnet.svg)](//github.com/ks-no/fiks-maskinporten-client-dotnet/issues)
 
 .net core library for maskinporten authorization through ID-porten
