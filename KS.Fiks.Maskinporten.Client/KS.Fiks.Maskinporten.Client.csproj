@@ -39,11 +39,10 @@
             <Pack>true</Pack>
             <PackagePath>/</PackagePath>
         </None>
-    </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)'=='Release'">
         <None Include="../README.md">
             <Pack>true</Pack>
-            <PackagePath>/</PackagePath>
-        </None>       
+            <PackagePath>.</PackagePath>
+        </None>
     </ItemGroup>
+
 </Project>
