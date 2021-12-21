@@ -34,7 +34,7 @@ var accessToken = await maskinportenClient.GetAccessToken(scope);
 ```c#
 var scope = "ks:fiks"; // Scope for access token
 var consumerOrgNo = ...; // Official 9 digit organization number for an organization that has delegated access to you in ALTINN
-var accessToken = await maskinportenClient.GetDelegatedAccessToken(scope);
+var accessToken = await maskinportenClient.GetDelegatedAccessToken(consumerOrgNo, scope);
 ```
 For more information on this feature, check the [delegation documentation](https://docs.digdir.no/maskinporten_func_delegering.html) at DigDir
 
