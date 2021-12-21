@@ -5,10 +5,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using JWT;
+using JWT.Exceptions;
 using Moq;
 using Moq.Protected;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Ks.Fiks.Maskinporten.Client.Tests
@@ -287,7 +286,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var sut = _fixture.WithIncorrectCertificate().CreateSut();
 
             await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
-            Assert.Throws<JWT.Exceptions.SignatureVerificationException>(() =>
+            Assert.Throws<SignatureVerificationException>(() =>
             {
                 _fixture.HttpMessageHandleMock.Protected().Verify(
                     "SendAsync",
