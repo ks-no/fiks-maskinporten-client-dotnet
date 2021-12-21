@@ -13,9 +13,9 @@ Install [KS.Fiks.Maskinporten.Client](https://www.nuget.org/packages/KS.Fiks.Mas
 ### Setup configuration
 ```c#
 var maskinportenConfig = new MaskinportenClientConfiguration(
-    audience: @"https://oidc-ver2.difi.no/idporten-oidc-provider/", // ID-porten audience path
-    tokenEndpoint: @"https://oidc-ver2.difi.no/idporten-oidc-provider/token", // ID-porten token path
-    issuer: @"oidc_ks_test",  // Issuer name, heter nå Integrasjonens identifikator i selvbetjeningsløsningen til difi
+    audience: @"https://ver2.maskinporten.no/", // ID-porten audience path
+    tokenEndpoint: @"https://ver2.maskinporten.no/token", // ID-porten token path
+    issuer: @"oidc_ks_test",  // Issuer name, heter nå Integrasjonens identifikator i selvbetjeningsløsningen til DigDir
     numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
     certificate: /* virksomhetssertifikat as a X509Certificate2  */,
     consumerOrg: /* optional value. Sets header consumer_org */);
@@ -30,6 +30,13 @@ var maskinportenClient = new MaskinportenClient(maskinportenConfig);
 var scope = "ks:fiks" // Scope for access token
 var accessToken = await maskinportenClient.GetAccessToken(scope);
 ```
+### Get delegated access token 
+```c#
+var scope = "ks:fiks" // Scope for access token
+var consumerOrgNo = "999999999" // Organization number that has delegated access to you in ALTINN
+var accessToken = await maskinportenClient.GetDelegatedAccessToken(scope);
+```
+For more information on this feature, check the [delegation documentation](https://docs.digdir.no/maskinporten_func_delegering.html) at DigDir
 
 ### Send request using access token
 ```c#
