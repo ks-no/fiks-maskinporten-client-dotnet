@@ -27,13 +27,13 @@ var maskinportenClient = new MaskinportenClient(maskinportenConfig);
 
 ### Get access token
 ```c#
-var scope = "ks:fiks" // Scope for access token
+var scope = "ks:fiks"; // Scope for access token
 var accessToken = await maskinportenClient.GetAccessToken(scope);
 ```
 ### Get delegated access token 
 ```c#
-var scope = "ks:fiks" // Scope for access token
-var consumerOrgNo = "999999999" // Organization number that has delegated access to you in ALTINN
+var scope = "ks:fiks"; // Scope for access token
+var consumerOrgNo = ...; // Official 9 digit organization number for an organization that has delegated access to you in ALTINN
 var accessToken = await maskinportenClient.GetDelegatedAccessToken(scope);
 ```
 For more information on this feature, check the [delegation documentation](https://docs.digdir.no/maskinporten_func_delegering.html) at DigDir
