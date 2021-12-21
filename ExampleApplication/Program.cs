@@ -29,8 +29,8 @@ namespace ExampleApplication
 
             var cert = new X509Certificate2(p12Filename, p12Password);
             var configuration = new MaskinportenClientConfiguration(
-                audience: @"https://oidc-ver2.difi.no/idporten-oidc-provider/", // ID-porten audience path
-                tokenEndpoint: @"https://oidc-ver2.difi.no/idporten-oidc-provider/token", // ID-porten token path
+                audience: @"https://ver2.maskinporten.no/", // ID-porten audience path
+                tokenEndpoint: @"https://ver2.maskinporten.no/token", // ID-porten token path
                 issuer: issuer, // Issuer name
                 numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
                 certificate: cert);
