@@ -11,6 +11,14 @@ Install [KS.Fiks.Maskinporten.Client](https://www.nuget.org/packages/KS.Fiks.Mas
 
 ## Example
 ### Setup configuration
+#### Using factory for VER2 and PROD environments
+```c#
+// For VER2 (test)
+var maskinportenConfigVer2 = MaskinportenClientConfigurationFactory.createVer2Configuration("ver2_issuer", testCertificate);
+// For PROD
+var maskinportenConfigProd = MaskinportenClientConfigurationFactory.createProdConfiguration("prod_issuer", certificate);
+```
+#### Complete configuration
 ```c#
 var maskinportenConfig = new MaskinportenClientConfiguration(
     audience: @"https://ver2.maskinporten.no/", // ID-porten audience path
@@ -20,6 +28,7 @@ var maskinportenConfig = new MaskinportenClientConfiguration(
     certificate: /* virksomhetssertifikat as a X509Certificate2  */,
     consumerOrg: /* optional value. Sets header consumer_org */);
 ```
+DigDir maintains a list of [well-know endpoints and configuration](https://docs.digdir.no/maskinporten_func_wellknown.html) for the available environments
 ### Create instance of MaskinportenClient
 ```c#
 var maskinportenClient = new MaskinportenClient(maskinportenConfig);
