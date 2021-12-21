@@ -18,11 +18,11 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>maskinporten.snk</AssemblyOriginatorKeyFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="JWT" Version="8.7.0" />
@@ -39,9 +39,11 @@
             <Pack>true</Pack>
             <PackagePath>/</PackagePath>
         </None>
+    </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)'=='Release'">
         <None Include="../README.md">
             <Pack>true</Pack>
             <PackagePath>/</PackagePath>
-        </None>
+        </None>       
     </ItemGroup>
 </Project>
