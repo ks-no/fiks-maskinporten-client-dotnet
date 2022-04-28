@@ -24,7 +24,7 @@
         <AssemblyOriginatorKeyFile>maskinporten.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="JWT" Version="8.7.0" />
+        <PackageReference Include="JWT" Version="9.0.0" />
         <PackageReference Include="KS.Fiks.QA" Version="1.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
         <PackageReference Include="Newtonsoft.Json" Version="[11.0.1, 13.0.1]" />
