@@ -1,10 +1,15 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using JWT;
 using JWT.Algorithms;
 using JWT.Serializers;
 using Ks.Fiks.Maskinporten.Client;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ExampleApplication
 {
@@ -16,48 +21,121 @@ namespace ExampleApplication
      */
     public class Program
     {
+        const string SCOPES = "ks:fiks";
+        private static IConfiguration _configuration;
+
         public static void Main(string[] args)
         {
+            _configuration = new ConfigurationBuilder()
+              .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+              .AddUserSecrets(typeof(Program).GetTypeInfo().Assembly)
+              .AddEnvironmentVariables()
+              .AddCommandLine(args)
+              .Build();
+
+            SampleUsingCertificateFromLocalFile();
+            //SampleUsingCertificateFromWindowsStore("LARVIK KOMMUNE");
+            //SampleUsingJsonWebKey();
+        }
+
+        private static void SampleUsingCertificateFromLocalFile()
+        {
             // Relative or absolute path to the *.p12-file containing the test certificate
-            var p12Filename = Environment.GetEnvironmentVariable("P12FILENAME");
-            
+            var p12Filename = _configuration["P12FILENAME"];
+
             // Password required to use the certificate
-            var p12Password = Environment.GetEnvironmentVariable("P12PWD");
-            
+            var p12Password = _configuration["P12PWD"];
+
             // The issuer as defined in Maskinporten
-            var issuer = Environment.GetEnvironmentVariable("MASKINPORTEN_ISSUER");
+            var issuer = _configuration["MASKINPORTEN_ISSUER"];
 
             var cert = new X509Certificate2(p12Filename, p12Password);
-            var configuration = new MaskinportenClientConfiguration(
-                audience: @"https://ver2.maskinporten.no/", // ID-porten audience path
-                tokenEndpoint: @"https://ver2.maskinporten.no/token", // ID-porten token path
-                issuer: issuer, // Issuer name
-                numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
-                certificate: cert);
+            var configuration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(issuer, cert);
+
             var maskinportenClient = new MaskinportenClient(configuration);
 
-            var tokenTask = maskinportenClient.GetAccessToken("ks:fiks").ContinueWith(t =>
+            
+            var tokenTask = maskinportenClient.GetAccessToken(SCOPES).ContinueWith(t =>
             {
                 var token = t.Result;
                 Console.Out.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
 
-                return DecodeToken(token, cert);
+                return DecodeToken(token, cert.GetRSAPublicKey(), cert.GetRSAPrivateKey());
             });
+
             // Do something with the token. In this case we only wait for it to be decoded and written to the console
             tokenTask.GetAwaiter().GetResult();
-
-
         }
 
-        private static string DecodeToken(MaskinportenToken token, X509Certificate2 pubprivCertificate)
+        private static void SampleUsingCertificateFromWindowsStore(string certificateName) {
+            var certificates = GetLocalMachineCertificates();
+            var cert = certificates.Cast<X509Certificate2>().FirstOrDefault(cert => cert.FriendlyName.Equals(certificateName));
+
+            if (cert == null)
+            {
+                Console.WriteLine($"Could not get sertificate with friendly name {certificateName}");
+                return;
+            }
+
+            string issuer = _configuration["MASKINPORTEN_ISSUER"];
+            var configuration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(issuer, cert);
+
+            var maskinportenClient = new MaskinportenClient(configuration);
+
+            var tokenTask = maskinportenClient.GetAccessToken(SCOPES).ContinueWith(t =>
+            {
+                var token = t.Result;
+                Console.Out.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
+
+                return DecodeToken(token, cert.GetRSAPublicKey(), cert.GetRSAPrivateKey());
+            });
+
+            // Do something with the token. In this case we only wait for it to be decoded and written to the console
+            tokenTask.GetAwaiter().GetResult();
+        }
+
+        private static void SampleUsingJsonWebKey()
+        {
+            // Relative or absolute path to the *.json file containing the JsonWebKey
+            var jwkJson = System.IO.File.ReadAllText(_configuration["PATH_TO_JWKFILE"]);
+            var jwk = new JsonWebKey(jwkJson);
+
+            string issuer = _configuration["MASKINPORTEN_ISSUER"];
+
+            var configuration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(issuer, jwk);
+
+            var maskinportenClient = new MaskinportenClient(configuration);
+
+            var tokenTask = maskinportenClient.GetAccessToken(SCOPES).ContinueWith(t =>
+            {
+                var token = t.Result;
+                Console.Out.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
+
+                return DecodeToken(token, jwk.GetRSAPublicKey(), jwk.GetRSAPrivateKey());
+            });
+
+            // Do something with the token. In this case we only wait for it to be decoded and written to the console
+            tokenTask.GetAwaiter().GetResult();
+        }
+
+        private static string DecodeToken(MaskinportenToken token, RSA publicKey, RSA privateKey)
         {
             var serializer = new JsonNetSerializer();
             var provider = new UtcDateTimeProvider();
 
-            var jwtDecoder = new JwtDecoder(serializer, new JwtValidator(serializer, provider), new JwtBase64UrlEncoder(), new RS256Algorithm(pubprivCertificate));
+            var jwtDecoder = new JwtDecoder(serializer, new JwtValidator(serializer, provider), new JwtBase64UrlEncoder(), new RS256Algorithm(publicKey, privateKey));
             var decodedToken = jwtDecoder.Decode(token.Token);
             Console.Out.WriteLine($"Decoded token {decodedToken}");
             return decodedToken;
+        }
+
+        private static X509Certificate2Collection GetLocalMachineCertificates()
+        {
+            var localMachineStore = new X509Store(StoreLocation.LocalMachine);
+            localMachineStore.Open(OpenFlags.ReadOnly);
+            var certificates = localMachineStore.Certificates;
+            localMachineStore.Close();
+            return certificates;
         }
     }
 }

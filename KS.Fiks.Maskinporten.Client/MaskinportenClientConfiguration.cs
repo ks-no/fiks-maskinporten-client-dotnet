@@ -1,4 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
+using Ks.Fiks.Maskinporten.Client.Jwt;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Ks.Fiks.Maskinporten.Client
 {
@@ -9,8 +11,10 @@ namespace Ks.Fiks.Maskinporten.Client
             string tokenEndpoint,
             string issuer,
             int numberOfSecondsLeftBeforeExpire,
-            X509Certificate2 certificate,
-            string consumerOrg = null)
+            X509Certificate2 certificate = null,
+            string consumerOrg = null,
+            JwtRequestTokenType requestType = JwtRequestTokenType.X509Certificate,
+            JsonWebKey jwk = null)
         {
             Audience = audience;
             TokenEndpoint = tokenEndpoint;
@@ -18,6 +22,8 @@ namespace Ks.Fiks.Maskinporten.Client
             NumberOfSecondsLeftBeforeExpire = numberOfSecondsLeftBeforeExpire;
             Certificate = certificate;
             ConsumerOrg = consumerOrg;
+            RequestType = requestType;
+            Jwk = jwk;
         }
 
         public string Audience { get; }
@@ -31,5 +37,9 @@ namespace Ks.Fiks.Maskinporten.Client
         public int NumberOfSecondsLeftBeforeExpire { get; }
 
         public X509Certificate2 Certificate { get; }
+
+        public JwtRequestTokenType RequestType { get; }
+
+        public JsonWebKey Jwk{ get; }
     }
 }
