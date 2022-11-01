@@ -105,7 +105,7 @@ namespace Ks.Fiks.Maskinporten.Client
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
             {
                 new KeyValuePair<string, string>("grant_type", GrantType),
-                new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(tokenRequest.Scopes, _configuration))
+                new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(tokenRequest.Scopes, _configuration, tokenRequest))
             });
 
             var consumerOrg = tokenRequest.ConsumerOrg ?? this._configuration.ConsumerOrg;
