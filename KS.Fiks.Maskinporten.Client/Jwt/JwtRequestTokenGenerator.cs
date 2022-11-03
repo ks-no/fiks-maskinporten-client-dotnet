@@ -5,6 +5,7 @@ using JWT;
 using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Serializers;
+using Ks.Fiks.Maskinporten.Client.Cache;
 
 namespace Ks.Fiks.Maskinporten.Client.Jwt
 {
@@ -16,7 +17,7 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
         private readonly JwtEncoder encoder;
         private readonly X509Certificate2 certificate;
 
-        private static IDictionary<string, object> CreateJwtPayload(string scope, MaskinportenClientConfiguration configuration)
+        private static IDictionary<string, object> CreateJwtPayload(TokenRequest tokenRequest, MaskinportenClientConfiguration configuration)
         {
             var jwtData = new JwtData();
 
@@ -24,8 +25,13 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
             jwtData.Payload.Add("aud", configuration.Audience);
             jwtData.Payload.Add("iat", UnixEpoch.GetSecondsSince(DateTime.UtcNow));
             jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddMinutes(JwtExpireTimeInMinutes)));
-            jwtData.Payload.Add("scope", scope);
+            jwtData.Payload.Add("scope", tokenRequest.Scopes);
             jwtData.Payload.Add("jti", Guid.NewGuid());
+
+            if (!string.IsNullOrEmpty(tokenRequest.ConsumerOrg))
+            {
+                jwtData.Payload.Add("consumer_org", tokenRequest.ConsumerOrg);
+            }
 
             return jwtData.Payload;
         }
@@ -39,9 +45,9 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
                 new JwtBase64UrlEncoder());
         }
 
-        public string CreateEncodedJwt(string scope, MaskinportenClientConfiguration configuration)
+        public string CreateEncodedJwt(TokenRequest tokenRequest, MaskinportenClientConfiguration configuration)
         {
-            var payload = CreateJwtPayload(scope, configuration);
+            var payload = CreateJwtPayload(tokenRequest, configuration);
             var header = CreateJwtHeader();
             var jwt = this.encoder.Encode(header, payload, DummyKey);
 
