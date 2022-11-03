@@ -29,7 +29,7 @@ namespace Ks.Fiks.Maskinporten.Client
             _configuration = configuration;
             _httpClient = httpClient ?? new HttpClient();
             _tokenCache = new TokenCache();
-            _tokenGenerator = new JwtRequestTokenGenerator(_configuration.Certificate);
+            _tokenGenerator = JwtRequestTokenGeneratorFactory.GetJwtRequestTokenGenerator(configuration);
         }
 
         public async Task<MaskinportenToken> GetAccessToken(IEnumerable<string> scopes)

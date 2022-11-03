@@ -1,3 +1,5 @@
+using Ks.Fiks.Maskinporten.Client.Jwt;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Ks.Fiks.Maskinporten.Client
@@ -30,6 +32,41 @@ namespace Ks.Fiks.Maskinporten.Client
             return new MaskinportenClientConfiguration(PROD_AUDIENCE,
                 PROD_TOKEN_ENDPOINT, issuer, numberOfSecondsLeftBeforeExpire, certificate,
                 consumerOrg);
+        }
+
+        //JWK
+        public static MaskinportenClientConfiguration CreateVer2Configuration(
+            string issuer,
+            JsonWebKey jwk,
+            int numberOfSecondsLeftBeforeExpire = DEFAULT_NUMBER_SECONDS_LEFT,
+            string consumerOrg = null)
+        {
+            return new MaskinportenClientConfiguration(
+                VER2_AUDIENCE,
+                VER2_TOKEN_ENDPOINT,
+                issuer,
+                numberOfSecondsLeftBeforeExpire,
+                null,
+                consumerOrg,
+                JwtRequestTokenType.JsonWebKey,
+                jwk);
+        }
+
+        public static MaskinportenClientConfiguration CreateProdConfiguration(
+            string issuer,
+            JsonWebKey jwk,
+            int numberOfSecondsLeftBeforeExpire = DEFAULT_NUMBER_SECONDS_LEFT,
+            string consumerOrg = null)
+        {
+            return new MaskinportenClientConfiguration(
+                PROD_AUDIENCE,
+                PROD_TOKEN_ENDPOINT,
+                issuer,
+                numberOfSecondsLeftBeforeExpire,
+                null,
+                consumerOrg,
+                JwtRequestTokenType.JsonWebKey,
+                jwk);
         }
     }
 }

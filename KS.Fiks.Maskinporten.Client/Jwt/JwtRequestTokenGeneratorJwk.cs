@@ -1,25 +1,31 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using JWT;
 using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Serializers;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Ks.Fiks.Maskinporten.Client.Jwt
 {
-    public class JwtRequestTokenGenerator : IJwtRequestTokenGenerator
+    public class JwtRequestTokenGeneratorJwk : IJwtRequestTokenGenerator
     {
         private const string DummyKey = ""; // Required by encoder, but not used with RS256Algorithm
 
         private readonly JwtEncoder encoder;
-        private readonly X509Certificate2 certificate;
+        private readonly string kid = string.Empty;
 
-        public JwtRequestTokenGenerator(X509Certificate2 certificate)
+        public JwtRequestTokenGeneratorJwk(JsonWebKey jwk)
         {
-            this.certificate = certificate;
+            this.kid = jwk.Kid;
+
+            var publicKey = jwk.GetRSAPublicKey();
+            var privateKey = jwk.GetRSAPrivateKey();
+
             this.encoder = new JwtEncoder(
-                new RS256Algorithm(this.certificate.GetRSAPublicKey(), this.certificate.GetRSAPrivateKey()),
+                new RS256Algorithm(publicKey, privateKey),
                 new JsonNetSerializer(),
                 new JwtBase64UrlEncoder());
         }
@@ -35,13 +41,8 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 
         private IDictionary<string, object> CreateJwtHeader()
         {
-            return new Dictionary<string, object>
-            {
-                {
-                    "x5c",
-                    new List<string>() { Convert.ToBase64String(this.certificate.Export(X509ContentType.Cert)) }
-                }
-            };
+            return new Dictionary<string, object>() { { "kid", this.kid } };
         }
+
     }
 }
