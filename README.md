@@ -47,6 +47,14 @@ var accessToken = await maskinportenClient.GetDelegatedAccessToken(consumerOrgNo
 ```
 For more information on this feature, check the [delegation documentation](https://docs.digdir.no/maskinporten_func_delegering.html) at DigDir
 
+### Get on behalf of access token
+```c#
+var scope = "ks:fiks"; // Scope for access token
+var consumerOrgNo = ...; // Official 9 digit organization number for an organization that has delegated access to you in ALTINN
+var accessToken = await maskinportenClient.GetOnBehalfOfAccessToken(consumerOrgNo, scope);
+```
+For more information on this feature, check the [onbehalfof documentation](https://docs.digdir.no/docs/idporten/oidc/oidc_api_admin_leverand%C3%B8r.html#1-onbehalfof-i-id-porten) at DigDir
+
 ### Send request using access token
 ```c#
 var httpClient = new HttpClient();

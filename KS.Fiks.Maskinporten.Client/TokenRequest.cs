@@ -8,6 +8,8 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 
         public string ConsumerOrg { get; set; }
 
+        public string OnBehalfOf { get; set; }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -25,12 +27,12 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 
         public override int GetHashCode()
         {
-            return (Scopes, ConsumerOrg).GetHashCode();
+            return (Scopes, ConsumerOrg, OnBehalfOf).GetHashCode();
         }
 
         private bool Equals(TokenRequest other)
         {
-            return Scopes == other.Scopes && ConsumerOrg == other.ConsumerOrg;
+            return Scopes == other.Scopes && ConsumerOrg == other.ConsumerOrg && OnBehalfOf == other.OnBehalfOf;
         }
     }
 }
