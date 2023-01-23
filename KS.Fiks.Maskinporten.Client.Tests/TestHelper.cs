@@ -67,7 +67,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var builder = new JwtBuilder()
                 .WithAlgorithmFactory(_factory)
                 .WithAlgorithm(new RS256Algorithm(Certificate))
-                .WithSerializer(_serializer)
+                .WithJsonSerializer(_serializer)
                 .WithValidator(_validator)
                 .WithSecret("passord")
                 .AddHeader(HeaderName.KeyId, keyId);
