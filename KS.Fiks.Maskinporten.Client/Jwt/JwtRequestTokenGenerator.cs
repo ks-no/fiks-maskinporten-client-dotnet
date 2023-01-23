@@ -22,6 +22,12 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
             var jwtData = new JwtData();
 
             jwtData.Payload.Add("iss", configuration.Issuer);
+
+            if (!string.IsNullOrEmpty(tokenRequest.OnBehalfOf))
+            {
+                jwtData.Payload.Add("iss_onbehalfof", tokenRequest.OnBehalfOf);
+            }
+
             jwtData.Payload.Add("aud", configuration.Audience);
             jwtData.Payload.Add("iat", UnixEpoch.GetSecondsSince(DateTime.UtcNow));
             jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddMinutes(JwtExpireTimeInMinutes)));
