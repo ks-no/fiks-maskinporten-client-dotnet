@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using JWT.Algorithms;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json.Linq;
@@ -20,6 +23,9 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private string _audience = "testAudience";
         private string _issuer = "testIssuer";
         private string? _consumerOrg = null;
+        private RSA? _privateKey = null;
+        private RSA? _publicKey = null;
+        private string? _keyIdentifier = null;
 
         public MaskinportenClientFixture()
         {
@@ -50,6 +56,14 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public MaskinportenClientFixture WithNumberOfSecondsLeftBeforeExpire(int number)
         {
             _numberOfSecondsLeftBeforeExpire = number;
+            return this;
+        }
+
+        public MaskinportenClientFixture WithKeyPair(RSA publicKey, RSA privateKey, string? keyIdentifier = null)
+        {
+            _publicKey = publicKey;
+            _privateKey = privateKey;
+            _keyIdentifier = keyIdentifier;
             return this;
         }
 
@@ -98,13 +112,28 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         private void SetDefaultProperties()
         {
+            X509Certificate2? cert = null;
+
+            if (UseCertificate())
+            {
+                cert = _useIncorrectCertificate ? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate;
+            }
+
             Configuration = new MaskinportenClientConfiguration(
                  _audience,
                  _tokenEndpoint,
                  _issuer,
                  _numberOfSecondsLeftBeforeExpire,
-                 _useIncorrectCertificate? TestHelper.CertificateOtherThanUsedForDecode : TestHelper.Certificate,
+                 cert,
+                 _publicKey,
+                 _privateKey,
+                 _keyIdentifier,
                  _consumerOrg);
+        }
+
+        private bool UseCertificate()
+        {
+            return _privateKey == null && _publicKey == null;
         }
 
         private void SetResponse()
@@ -128,6 +157,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         private string GenerateJsonResponse()
         {
+            const string KeyIdentifier = "some-key";
             dynamic response = new JObject();
             response.Add("expires_in", _expirationTime);
 
@@ -142,7 +172,22 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 {"client_orgno", "987654321"},
                 {"jti", "3Yi-C4E7wAYmCB1Qxaa44VSlmyyGtmrzQQCRN7p4xCY="}
             };
-            var encodedToken = TestHelper.EncodeJwt("mqT5A3LOSIHbpKrscb3EHGrr-WIFRfLdaqZ_5J9GR9s", tokenResponse);
+
+            string encodedToken;
+
+            if (UseCertificate())
+            {
+                encodedToken = TestHelper.EncodeJwt(KeyIdentifier, tokenResponse);
+            }
+            else
+            {
+                encodedToken = TestHelper.EncodeJwt(
+                    KeyIdentifier,
+                    tokenResponse,
+                    new RSAlgorithmFactory(_publicKey, _privateKey),
+                    new RS256Algorithm(_publicKey, _privateKey));
+            }
+
             response.Add("access_token", encodedToken);
             return response.ToString();
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using JWT;
 using JWT.Algorithms;
@@ -16,6 +17,9 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 
         private readonly JwtEncoder encoder;
         private readonly X509Certificate2 certificate;
+        private readonly string keyIdentifier;
+        private readonly RSA privateKey;
+        private readonly RSA publicKey;
 
         private static IDictionary<string, object> CreateJwtPayload(TokenRequest tokenRequest, MaskinportenClientConfiguration configuration)
         {
@@ -45,8 +49,21 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
         public JwtRequestTokenGenerator(X509Certificate2 certificate)
         {
             this.certificate = certificate;
+            this.privateKey = certificate.GetRSAPrivateKey();
+            this.publicKey = certificate.GetRSAPublicKey();
             this.encoder = new JwtEncoder(
-                new RS256Algorithm(this.certificate.GetRSAPublicKey(), this.certificate.GetRSAPrivateKey()),
+                new RS256Algorithm(publicKey, privateKey),
+                new JsonNetSerializer(),
+                new JwtBase64UrlEncoder());
+        }
+
+        public JwtRequestTokenGenerator(RSA publicKey, RSA privateKey, string keyIdentifier = null)
+        {
+            this.keyIdentifier = keyIdentifier;
+            this.privateKey = privateKey;
+            this.publicKey = publicKey;
+            this.encoder = new JwtEncoder(
+                new RS256Algorithm(publicKey, privateKey),
                 new JsonNetSerializer(),
                 new JwtBase64UrlEncoder());
         }
@@ -62,13 +79,19 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 
         private IDictionary<string, object> CreateJwtHeader()
         {
-            return new Dictionary<string, object>
+            Dictionary<string, object> jwtHeaderValues = new Dictionary<string, object>();
+
+            if (certificate != null)
             {
-                {
-                    "x5c",
-                    new List<string>() { Convert.ToBase64String(this.certificate.Export(X509ContentType.Cert)) }
-                }
-            };
+                jwtHeaderValues.Add("x5c", new List<string>() { Convert.ToBase64String(this.certificate.Export(X509ContentType.Cert)) });
+            }
+
+            if (!string.IsNullOrWhiteSpace(keyIdentifier))
+            {
+                jwtHeaderValues.Add("kid", keyIdentifier);
+            }
+
+            return jwtHeaderValues;
         }
     }
 }
