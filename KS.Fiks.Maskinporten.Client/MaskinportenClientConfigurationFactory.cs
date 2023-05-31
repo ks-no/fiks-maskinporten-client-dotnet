@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Ks.Fiks.Maskinporten.Client
@@ -12,23 +13,43 @@ namespace Ks.Fiks.Maskinporten.Client
 
         public static MaskinportenClientConfiguration CreateVer2Configuration(
             string issuer,
-            X509Certificate2 certificate,
+            X509Certificate2 certificate = null,
+            RSA privateKey = null,
+            RSA publicKey = null,
+            string keyIdentifier = null,
             int numberOfSecondsLeftBeforeExpire = DEFAULT_NUMBER_SECONDS_LEFT,
             string consumerOrg = null)
         {
-            return new MaskinportenClientConfiguration(VER2_AUDIENCE,
-                VER2_TOKEN_ENDPOINT, issuer, numberOfSecondsLeftBeforeExpire, certificate,
+            return new MaskinportenClientConfiguration(
+                VER2_AUDIENCE,
+                VER2_TOKEN_ENDPOINT,
+                issuer,
+                numberOfSecondsLeftBeforeExpire,
+                certificate,
+                privateKey,
+                publicKey,
+                keyIdentifier,
                 consumerOrg);
         }
 
         public static MaskinportenClientConfiguration CreateProdConfiguration(
             string issuer,
-            X509Certificate2 certificate,
+            X509Certificate2 certificate = null,
+            RSA privateKey = null,
+            RSA publicKey = null,
+            string keyIdentifier = null,
             int numberOfSecondsLeftBeforeExpire = DEFAULT_NUMBER_SECONDS_LEFT,
             string consumerOrg = null)
         {
-            return new MaskinportenClientConfiguration(PROD_AUDIENCE,
-                PROD_TOKEN_ENDPOINT, issuer, numberOfSecondsLeftBeforeExpire, certificate,
+            return new MaskinportenClientConfiguration(
+                PROD_AUDIENCE,
+                PROD_TOKEN_ENDPOINT,
+                issuer,
+                numberOfSecondsLeftBeforeExpire,
+                certificate,
+                privateKey,
+                publicKey,
+                keyIdentifier,
                 consumerOrg);
         }
     }

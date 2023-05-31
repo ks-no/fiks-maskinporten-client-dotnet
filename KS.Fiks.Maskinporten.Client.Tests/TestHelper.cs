@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
 using JWT;
@@ -21,6 +22,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private static readonly JwtValidator _validator = new JwtValidator(_serializer, new UtcDateTimeProvider());
         private static readonly JwtBase64UrlEncoder _urlEncoder = new JwtBase64UrlEncoder();
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly RSA _publicKey = RSA.Create();
+        private static readonly RSA _privateKey = RSA.Create();
 
         public static Dictionary<string, string> RequestContentAsDictionary(HttpRequestMessage request)
         {
@@ -39,6 +42,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 "bob-virksomhetssertifikat.p12",
                 "PASSWORD");
 
+        public static RSA PublicKey => _publicKey;
+
+        public static RSA PrivateKey => _privateKey;
+
         public static bool RequestContentIsJwt(HttpRequestMessage request, string jwtFieldName)
         {
             var content = RequestContentAsDictionary(request);
@@ -46,7 +53,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
             try
             {
-                var decodedJwt = GetDeserializedJwt(serializedJwt);
+                var decodedJwt = GetDeserializedJwt(serializedJwt, _factory);
                 return decodedJwt?.Length > 0;
             }
             catch (Exception ex)
@@ -58,15 +65,25 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
         public static string DeserializedFieldInJwt(HttpRequestMessage request, string jwtFieldName, string field)
         {
-            return DeserializedFieldInJwt<string>(request, jwtFieldName, field);
+            return DeserializedFieldInJwt(request, jwtFieldName, field, _factory);
+        }
+
+        public static string DeserializedFieldInJwt(HttpRequestMessage request, string jwtFieldName, string field, IAlgorithmFactory factory)
+        {
+            return DeserializedFieldInJwt<string>(request, jwtFieldName, field, factory);
         }
 
         public static string EncodeJwt(string keyId, Dictionary<string, object> claims)
         {
+            return EncodeJwt(keyId, claims, _factory, new RS256Algorithm(Certificate));
+        }
+
+        public static string EncodeJwt(string keyId, Dictionary<string, object> claims, IAlgorithmFactory factory, IJwtAlgorithm algorithm)
+        {
 
             var builder = new JwtBuilder()
-                .WithAlgorithmFactory(_factory)
-                .WithAlgorithm(new RS256Algorithm(Certificate))
+                .WithAlgorithmFactory(factory)
+                .WithAlgorithm(algorithm)
                 .WithJsonSerializer(_serializer)
                 .WithValidator(_validator)
                 .WithSecret("passord")
@@ -80,19 +97,25 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             return builder.Encode();
         }
 
-        public static T DeserializedFieldInJwt<T>(HttpRequestMessage request, string jwtFieldName, string field)
+        public static T DeserializedFieldInJwt<T>(HttpRequestMessage request, string jwtFieldName, string field, IAlgorithmFactory factory)
         {
             var content = RequestContentAsDictionary(request);
             var serializedJwt = content[jwtFieldName];
-            var deserializedJwt = GetDeserializedJwt(serializedJwt);
+            var deserializedJwt = GetDeserializedJwt(serializedJwt, factory);
 
             var jwtAsDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(deserializedJwt);
             return (T)jwtAsDictionary[field];
         }
 
-        private static string GetDeserializedJwt(string serializedJwt)
+        public static T DeserializedFieldInJwt<T>(HttpRequestMessage request, string jwtFieldName, string field)
         {
-            var decoder = new JwtDecoder(_serializer, _validator, _urlEncoder, _factory);
+            return DeserializedFieldInJwt<T>(request, jwtFieldName, field, _factory);
+        }
+
+        private static string GetDeserializedJwt(string serializedJwt, IAlgorithmFactory factory)
+        {
+            var decoder = new JwtDecoder(_serializer, _validator, _urlEncoder, factory);
+
             return decoder.Decode(serializedJwt, "MustBeNonNullButValueDoesNotMatterForRS256", true);
         }
     }

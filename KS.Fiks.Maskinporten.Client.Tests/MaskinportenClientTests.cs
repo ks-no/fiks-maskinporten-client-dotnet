@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using JWT.Algorithms;
 using JWT.Exceptions;
 using Moq;
 using Moq.Protected;
@@ -28,6 +29,31 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
 
             var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
             accessToken.Should().BeOfType<MaskinportenToken>();
+        }
+
+        [Fact]
+        public async Task ReturnsAccessTokenUsingKeyPair()
+        {
+            const string ExpectedAudience = "someAudience";
+            var sut = _fixture
+                .WithAudience(ExpectedAudience)
+                .WithKeyPair(TestHelper.PublicKey, TestHelper.PrivateKey)
+                .CreateSut();
+
+            var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
+            accessToken.Should().BeOfType<MaskinportenToken>();
+
+            // This verifies that the audience field is encrypted by the sut av possible to decrypt using key pair.
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    TestHelper.DeserializedFieldInJwt(
+                        req,
+                        "assertion",
+                        "aud",
+                        new RSAlgorithmFactory(TestHelper.PublicKey, TestHelper.PrivateKey)) == ExpectedAudience),
+                ItExpr.IsAny<CancellationToken>());
         }
 
         [Fact]
