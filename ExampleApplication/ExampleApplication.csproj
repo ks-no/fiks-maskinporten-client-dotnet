@@ -9,4 +9,8 @@
       <ProjectReference Include="..\KS.Fiks.Maskinporten.Client\KS.Fiks.Maskinporten.Client.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.30.1" />
+    </ItemGroup>
+
 </Project>
