@@ -50,29 +50,7 @@ namespace ExampleApplication
             var maskinportenClient = new MaskinportenClient(configuration);
             var token = await maskinportenClient.GetAccessToken("ks:fiks");
             
-            using var client = new HttpClient();
-            var json = await client.GetStringAsync("https://ver2.maskinporten.no/jwk");
-            var jwks = new JsonWebKeySet(json);
-            var jwk = jwks.Keys.First();
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = false,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = "https://ver2.maskinporten.no/",
-                IssuerSigningKey = jwk
-            };
-
-            var handler = new JwtSecurityTokenHandler();
-            var claimsPrincipal = handler.ValidateToken(token.Token, validationParameters, out var validatedToken);
-
-            var claims = claimsPrincipal.Claims;
-            foreach (var claim in claims) Console.WriteLine($"{claim.Type}: {claim.Value}");
-
-            Console.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
-            Console.WriteLine($"Token valid until: {validatedToken.ValidTo}");
+            await ValidateToken(token);
         }
 
         private static async Task CertExample()
@@ -96,16 +74,34 @@ namespace ExampleApplication
             var maskinportenClient = new MaskinportenClient(configuration);
 
             var token = await maskinportenClient.GetAccessToken("ks:fiks");
+            await ValidateToken(token);
+        }
+
+        private static async Task ValidateToken(MaskinportenToken token)
+        {
+            using var client = new HttpClient();
+            var json = await client.GetStringAsync("https://ver2.maskinporten.no/jwk");
+            var jwks = new JsonWebKeySet(json);
+            var jwk = jwks.Keys.First();
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = "https://ver2.maskinporten.no/",
+                IssuerSigningKey = jwk
+            };
+
+            var handler = new JwtSecurityTokenHandler();
+            var claimsPrincipal = handler.ValidateToken(token.Token, validationParameters, out var validatedToken);
+
+            var claims = claimsPrincipal.Claims;
+            foreach (var claim in claims) Console.WriteLine($"{claim.Type}: {claim.Value}");
+
             Console.WriteLine($"Token (expiring: {token.IsExpiring()}): {token.Token}");
-
-            var serializer = new JsonNetSerializer();
-            var provider = new UtcDateTimeProvider();
-
-            var jwtDecoder = new JwtDecoder(serializer, new JwtValidator(serializer, provider),
-                new JwtBase64UrlEncoder(),
-                new RS256Algorithm(cert));
-            var decodedToken = jwtDecoder.Decode(token.Token);
-            Console.WriteLine($"Decoded token {decodedToken}");
+            Console.WriteLine($"Token valid until: {validatedToken.ValidTo}");
         }
     }
 }
