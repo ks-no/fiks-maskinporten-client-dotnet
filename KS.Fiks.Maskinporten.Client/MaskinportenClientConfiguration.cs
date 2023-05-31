@@ -22,6 +22,11 @@ namespace Ks.Fiks.Maskinporten.Client
                 throw new ArgumentException("Either certificate or private and public key must be set!");
             }
 
+            if (certificate != null && (privateKey != null || publicKey != null))
+            {
+                throw new ArgumentException("Only certificate or public/private key must be set. Not both");
+            }
+
             Audience = audience;
             TokenEndpoint = tokenEndpoint;
             Issuer = issuer;
