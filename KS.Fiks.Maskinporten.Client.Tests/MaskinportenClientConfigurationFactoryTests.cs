@@ -19,7 +19,20 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         }
 
         [Fact]
-        public void CreateVer2ConfigurationWithKeyPair()
+        public void CreateTestConfiguration()
+        {
+            const string issuer = "issuer";
+            var certificate = TestHelper.Certificate;
+            var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateTestConfiguration(issuer, certificate);
+            maskinportenClientConfiguration.TokenEndpoint.Should()
+                .Be(MaskinportenClientConfigurationFactory.TEST_TOKEN_ENDPOINT);
+            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.TEST_AUDIENCE);
+            maskinportenClientConfiguration.Issuer.Should().Be(issuer);
+            maskinportenClientConfiguration.Certificate.Should().Be(certificate);
+        }
+        
+        [Fact]
+        public void CreateTestConfigurationWithKeyPair()
         {
             const string issuer = "issuer";
             const string keyIdentifier = "some-kid";
