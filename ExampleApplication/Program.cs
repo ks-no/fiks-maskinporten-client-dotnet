@@ -40,7 +40,7 @@ namespace ExampleApplication
             rsa.ImportPkcs8PrivateKey(Convert.FromBase64String(pem), out _);
 
             const string keyIdentifier = "23b3f45a-be84-43c4-a654-2182ff14dc40";
-            var configuration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(
+            var configuration = MaskinportenClientConfigurationFactory.CreateTestConfiguration(
                 issuer,
                 privateKey: rsa,
                 publicKey: rsa,
