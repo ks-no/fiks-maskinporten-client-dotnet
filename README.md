@@ -11,14 +11,33 @@ Install [KS.Fiks.Maskinporten.Client](https://www.nuget.org/packages/KS.Fiks.Mas
 
 ## Example
 ### Setup configuration
-#### Using factory for VER2 and PROD environments
+#### Using factory for TEST and PROD environments
 ```c#
-// For VER2 (test)
-var maskinportenConfigVer2 = MaskinportenClientConfigurationFactory.CreateVer2Configuration("ver2_issuer", testCertificate);
+// For TEST
+var maskinportenConfigTest = MaskinportenClientConfigurationFactory.CreateTestConfiguration("test_issuer", testCertificate);
+
 // For PROD
 var maskinportenConfigProd = MaskinportenClientConfigurationFactory.CreateProdConfiguration("prod_issuer", certificate);
+
+// DEPRECATED - For TEST (ver2)
+var maskinportenConfigVer2 = MaskinportenClientConfigurationFactory.CreateVer2Configuration("ver2_issuer", testCertificate);
 ```
 #### Complete configuration
+
+##### Test environment 
+
+```c#
+var maskinportenConfig = new MaskinportenClientConfiguration(
+    audience: @"https://test.maskinporten.no/", // ID-porten audience path
+    tokenEndpoint: @"https://test.maskinporten.no/token", // ID-porten token path
+    issuer: @"issuer",  // Issuer name, heter nå Integrasjonens identifikator i selvbetjeningsløsningen til DigDir
+    numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
+    certificate: /* virksomhetssertifikat as a X509Certificate2  */,
+    consumerOrg: /* optional value. Sets header consumer_org */);
+```
+
+##### Test environment - ver2 (deprecated)
+
 ```c#
 var maskinportenConfig = new MaskinportenClientConfiguration(
     audience: @"https://ver2.maskinporten.no/", // ID-porten audience path
