@@ -28,8 +28,8 @@ var maskinportenConfigVer2 = MaskinportenClientConfigurationFactory.CreateVer2Co
 
 ```c#
 var maskinportenConfig = new MaskinportenClientConfiguration(
-    audience: @"https://test.maskinporten.no/", // ID-porten audience path
-    tokenEndpoint: @"https://test.maskinporten.no/token", // ID-porten token path
+    audience: @"https://test.maskinporten.no/", // Maskinporten audience path
+    tokenEndpoint: @"https://test.maskinporten.no/token", // Maskinporten token path
     issuer: @"issuer",  // Issuer name, heter nå Integrasjonens identifikator i selvbetjeningsløsningen til DigDir
     numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
     certificate: /* virksomhetssertifikat as a X509Certificate2  */,
@@ -40,8 +40,8 @@ var maskinportenConfig = new MaskinportenClientConfiguration(
 
 ```c#
 var maskinportenConfig = new MaskinportenClientConfiguration(
-    audience: @"https://ver2.maskinporten.no/", // ID-porten audience path
-    tokenEndpoint: @"https://ver2.maskinporten.no/token", // ID-porten token path
+    audience: @"https://ver2.maskinporten.no/", // Maskinporten audience path
+    tokenEndpoint: @"https://ver2.maskinporten.no/token", // Maskinporten token path
     issuer: @"issuer",  // Issuer name, heter nå Integrasjonens identifikator i selvbetjeningsløsningen til DigDir
     numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
     certificate: /* virksomhetssertifikat as a X509Certificate2  */,
