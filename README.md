@@ -3,8 +3,13 @@
 [![Nuget](https://img.shields.io/nuget/v/KS.fiks.maskinporten.client.svg)](https://www.nuget.org/packages/KS.Fiks.Maskinporten.Client)
 [![GitHub issues](https://img.shields.io/github/issues-raw/ks-no/kryptering-dotnet.svg)](//github.com/ks-no/fiks-maskinporten-client-dotnet/issues)
 
-.net core library for maskinporten authorization through ID-porten
 
+## About this library
+This library is a .net core library for maskinporten authorization through ID-porten.
+There is is also available a similar version for Java [here](). 
+
+### Integrity 
+The nuget package is signed with a KS certificate in our build process, stored securely in a safe build environment.
 
 ## Installation
 Install [KS.Fiks.Maskinporten.Client](https://www.nuget.org/packages/KS.Fiks.Maskinporten.Client) nuget package in your .net project.
