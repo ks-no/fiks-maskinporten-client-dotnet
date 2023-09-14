@@ -5,8 +5,8 @@
 
 
 ## About this library
-This library is a .net core library for maskinporten authorization through ID-porten.
-There is is also available a similar version for Java [here](). 
+This is a .NET library for Maskinporten authentication and authorization.
+There is also a similar version available for Java [here](https://github.com/ks-no/fiks-maskinporten)
 
 ### Integrity 
 The nuget package is signed with a KS certificate in our build process, stored securely in a safe build environment.
