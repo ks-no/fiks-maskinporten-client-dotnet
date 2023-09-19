@@ -3,13 +3,13 @@
 [![Nuget](https://img.shields.io/nuget/v/KS.fiks.maskinporten.client.svg)](https://www.nuget.org/packages/KS.Fiks.Maskinporten.Client)
 [![GitHub issues](https://img.shields.io/github/issues-raw/ks-no/kryptering-dotnet.svg)](//github.com/ks-no/fiks-maskinporten-client-dotnet/issues)
 
-
 ## About this library
 This is a .NET library for Maskinporten authentication and authorization.
 There is also a similar version available for Java [here](https://github.com/ks-no/fiks-maskinporten)
 
 ### Integrity 
 The nuget package is signed with a KS certificate in our build process, stored securely in a safe build environment.
+The package assemblies are also [strong-named](https://learn.microsoft.com/en-us/dotnet/standard/assembly/strong-named).
 
 ## Installation
 Install [KS.Fiks.Maskinporten.Client](https://www.nuget.org/packages/KS.Fiks.Maskinporten.Client) nuget package in your .net project.
