@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using JWT.Algorithms;
 using JWT.Exceptions;
-using KS.Fiks.Maskinporten.Client.Error;
+using Ks.Fiks.Maskinporten.Client.Errors;
 using Moq;
 using Moq.Protected;
 using Xunit;
