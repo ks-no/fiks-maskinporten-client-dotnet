@@ -83,8 +83,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 .Be(MaskinportenClientConfigurationFactory.PROD_TOKEN_ENDPOINT);
             maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.PROD_AUDIENCE);
             maskinportenClientConfiguration.Issuer.Should().Be(issuer);
-            maskinportenClientConfiguration.PrivateKey.Should().Be(privateKey);
-            maskinportenClientConfiguration.PublicKey.Should().Be(publicKey);
+            maskinportenClientConfiguration.PrivateKey.Should().BeEquivalentTo(privateKey);
+            maskinportenClientConfiguration.PublicKey.Should().BeEquivalentTo(publicKey);
             maskinportenClientConfiguration.KeyIdentifier.Should().Be(keyIdentifier);
         }
     }
