@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using JWT.Algorithms;
 using JWT.Exceptions;
+using KS.Fiks.Maskinporten.Client.Error;
 using Moq;
 using Moq.Protected;
 using Xunit;
@@ -426,6 +427,16 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var sut = _fixture.WithStatusCode(statusCode).CreateSut();
 
             await Assert.ThrowsAsync<UnexpectedResponseException>(
+                async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false)).ConfigureAwait(false);
+        }
+
+        [Theory]
+        [InlineData(HttpStatusCode.ServiceUnavailable)]
+        public async Task ThrowsTemporarilyUnavailableExecption(HttpStatusCode statusCode)
+        {
+            var sut = _fixture.WithStatusCode(statusCode).CreateSut();
+
+            await Assert.ThrowsAsync<TemporarilyUnavailableException>(
                 async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false)).ConfigureAwait(false);
         }
     }

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Ks.Fiks.Maskinporten.Client.Cache;
+using KS.Fiks.Maskinporten.Client.Error;
 using Ks.Fiks.Maskinporten.Client.Jwt;
 using Newtonsoft.Json;
 
@@ -149,6 +150,13 @@ namespace Ks.Fiks.Maskinporten.Client
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                {
+                    throw new TemporarilyUnavailableException(
+                        $"Got HTTP Status code {response.StatusCode} from {_configuration.TokenEndpoint}. Content: {content}. Please try again later.");
+                }
+
                 throw new UnexpectedResponseException(
                     $"Got unexpected HTTP Status code {response.StatusCode} from {_configuration.TokenEndpoint}. Content: {content}.");
             }
