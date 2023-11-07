@@ -6,7 +6,9 @@ namespace Ks.Fiks.Maskinporten.Client
 {
     public class MaskinportenClientConfigurationFactory
     {
+        [Obsolete("VER2 is deprecated, use TEST instead")]
         public const string VER2_AUDIENCE = "https://ver2.maskinporten.no/";
+        [Obsolete("VER2 is deprecated, use TEST instead")]
         public const string VER2_TOKEN_ENDPOINT = "https://ver2.maskinporten.no/token";
         public const string TEST_AUDIENCE = "https://test.maskinporten.no/";
         public const string TEST_TOKEN_ENDPOINT = "https://test.maskinporten.no/token";

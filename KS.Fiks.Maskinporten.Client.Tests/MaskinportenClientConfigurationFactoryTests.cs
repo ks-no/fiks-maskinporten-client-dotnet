@@ -8,6 +8,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         [Fact]
         public void CreateVer2Configuration()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             const string issuer = "issuer";
             var certificate = TestHelper.Certificate;
             var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(issuer, certificate);
@@ -16,6 +17,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.VER2_AUDIENCE);
             maskinportenClientConfiguration.Issuer.Should().Be(issuer);
             maskinportenClientConfiguration.Certificate.Should().Be(certificate);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         [Fact]
@@ -38,14 +40,14 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             const string keyIdentifier = "some-kid";
             var privateKey = TestHelper.PrivateKey;
             var publicKey = TestHelper.PublicKey;
-            var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(
+            var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateTestConfiguration(
                 issuer,
                 privateKey: privateKey,
                 publicKey: publicKey,
                 keyIdentifier: keyIdentifier);
             maskinportenClientConfiguration.TokenEndpoint.Should()
-                .Be(MaskinportenClientConfigurationFactory.VER2_TOKEN_ENDPOINT);
-            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.VER2_AUDIENCE);
+                .Be(MaskinportenClientConfigurationFactory.TEST_TOKEN_ENDPOINT);
+            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.TEST_AUDIENCE);
             maskinportenClientConfiguration.Issuer.Should().Be(issuer);
             maskinportenClientConfiguration.PrivateKey.Should().Be(privateKey);
             maskinportenClientConfiguration.PublicKey.Should().Be(publicKey);
