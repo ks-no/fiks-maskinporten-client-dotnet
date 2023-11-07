@@ -4,7 +4,7 @@
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <RootNamespace>KS.Fiks.Maskinporten.Client.Tests</RootNamespace>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
 
     </PropertyGroup>
 
