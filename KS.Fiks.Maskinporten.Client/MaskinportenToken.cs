@@ -9,11 +9,13 @@ namespace Ks.Fiks.Maskinporten.Client
     {
         private readonly DateTime _requestNewTokenAfterTime;
 
+        public int ExpiresIn { get; }
+
         public MaskinportenToken(string token, int expiresIn)
         {
             _requestNewTokenAfterTime = DateTime.UtcNow.AddSeconds(expiresIn);
-
             Token = token;
+            ExpiresIn = expiresIn;
         }
 
         public string Token { get; }
