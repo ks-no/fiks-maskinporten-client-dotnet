@@ -12,7 +12,6 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 {
     public class JwtRequestTokenGenerator : IJwtRequestTokenGenerator
     {
-        private const int JwtExpireTimeInMinutes = 2;
         private const string DummyKey = ""; // Required by encoder, but not used with RS256Algorithm
 
         private readonly JwtEncoder encoder;
@@ -34,7 +33,7 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 
             jwtData.Payload.Add("aud", configuration.Audience);
             jwtData.Payload.Add("iat", UnixEpoch.GetSecondsSince(DateTime.UtcNow));
-            jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddMinutes(JwtExpireTimeInMinutes)));
+            jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddSeconds(configuration.NumberOfSecondsLeftBeforeExpire)));
             jwtData.Payload.Add("scope", tokenRequest.Scopes);
             jwtData.Payload.Add("jti", Guid.NewGuid());
 
