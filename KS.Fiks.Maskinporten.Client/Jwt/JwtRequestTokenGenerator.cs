@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using JWT;
@@ -49,6 +51,12 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
         public JwtRequestTokenGenerator(X509Certificate2 certificate)
         {
             this.certificate = certificate;
+            if (!string.IsNullOrEmpty(this.certificate.SerialNumber))
+            {
+                var convertedSerialnumber = BigInteger.Parse(this.certificate.SerialNumber, NumberStyles.HexNumber);
+                keyIdentifier = convertedSerialnumber.ToString();
+            }
+
             this.privateKey = certificate.GetRSAPrivateKey();
             this.publicKey = certificate.GetRSAPublicKey();
             this.encoder = new JwtEncoder(
