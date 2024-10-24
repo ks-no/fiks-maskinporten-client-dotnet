@@ -48,13 +48,12 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
             return jwtData.Payload;
         }
 
-        public JwtRequestTokenGenerator(X509Certificate2 certificate)
+        public JwtRequestTokenGenerator(X509Certificate2 certificate, string keyIdentifier = null)
         {
             this.certificate = certificate;
-            if (!string.IsNullOrEmpty(this.certificate.SerialNumber))
+            if (!string.IsNullOrEmpty(keyIdentifier))
             {
-                var convertedSerialnumber = BigInteger.Parse(this.certificate.SerialNumber, NumberStyles.HexNumber);
-                keyIdentifier = convertedSerialnumber.ToString();
+                this.keyIdentifier = keyIdentifier;
             }
 
             this.privateKey = certificate.GetRSAPrivateKey();

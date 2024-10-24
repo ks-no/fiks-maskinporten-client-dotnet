@@ -31,7 +31,7 @@ namespace Ks.Fiks.Maskinporten.Client
             _tokenCache = new TokenCache();
             if (_configuration.Certificate != null)
             {
-                _tokenGenerator = new JwtRequestTokenGenerator(_configuration.Certificate);
+                _tokenGenerator = new JwtRequestTokenGenerator(_configuration.Certificate, _configuration.KeyIdentifier);
             }
             else
             {
