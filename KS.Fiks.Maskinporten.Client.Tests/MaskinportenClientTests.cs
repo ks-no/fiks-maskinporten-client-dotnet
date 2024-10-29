@@ -5,8 +5,10 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using JWT;
 using JWT.Algorithms;
 using JWT.Exceptions;
+using JWT.Serializers;
 using Moq;
 using Moq.Protected;
 using Xunit;
@@ -116,6 +118,28 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 Times.Exactly(1),
                 ItExpr.Is<HttpRequestMessage>(req => true),
                 ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task SendsAudienceAsAssertionResourceToTokenEndpoint()
+        {
+            const string audience = "https://localhost/api";
+            var sut = _fixture.CreateSut();
+
+            await sut.GetDelegatedAccessTokenForAudience("999888999", audience, _fixture.DefaultScopes).ConfigureAwait(false);
+
+            var requestMessage = _fixture.HttpMessageHandleMock.Invocations.Single().Arguments.Single(o => o is HttpRequestMessage) as HttpRequestMessage;
+            requestMessage?.Content.Should().NotBeNull();
+
+            var requestContent = await requestMessage!.Content!.ReadAsStringAsync().ConfigureAwait(false);
+            var contentDict = requestContent.Split("&").Select(p => p.Split("=")).ToDictionary(_ => _[0], _ => _[1]);
+
+            var decoder = new JwtDecoder(
+                new JsonNetSerializer(),
+                new JwtBase64UrlEncoder());
+
+            var assertionData = decoder.DecodeToObject(contentDict["assertion"], false);
+            assertionData["resource"].Should().Be(audience);
         }
 
         [Fact]
