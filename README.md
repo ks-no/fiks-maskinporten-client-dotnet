@@ -71,6 +71,15 @@ var accessToken = await maskinportenClient.GetDelegatedAccessToken(consumerOrgNo
 ```
 For more information on this feature, check the [delegation documentation](https://docs.digdir.no/maskinporten_func_delegering.html) at DigDir
 
+### Get delegated access audience-restricted token  
+```c#
+var audience = "https://some/api"; // Audience for access token
+var scope = "ks:fiks"; // Scope for access token
+var consumerOrgNo = ...; // Official 9 digit organization number for an organization that has delegated access to you in ALTINN
+var accessToken = await maskinportenClient.GetDelegatedAccessTokenForAudience(consumerOrgNo, audience, scope);
+```
+For more information on this feature, check the [delegation documentation](https://docs.digdir.no/maskinporten_func_delegering.html) [audience-restricted tokens](https://docs.digdir.no/docs/Maskinporten/maskinporten_func_audience_restricted_tokens) at DigDir
+
 ### Get on behalf of access token
 *This is a feature with limited usecase*
 ```c#

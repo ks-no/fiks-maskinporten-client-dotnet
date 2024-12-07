@@ -10,6 +10,8 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 
         public string OnBehalfOf { get; set; }
 
+        public string Audience { get; set; }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
