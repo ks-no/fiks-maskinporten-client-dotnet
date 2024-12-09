@@ -35,12 +35,14 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public static X509Certificate2 Certificate =>
             new X509Certificate2(
                 "alice-virksomhetssertifikat.p12",
-                "PASSWORD");
+                "PASSWORD",
+                X509KeyStorageFlags.EphemeralKeySet);
 
         public static X509Certificate2 CertificateOtherThanUsedForDecode =>
             new X509Certificate2(
                 "bob-virksomhetssertifikat.p12",
-                "PASSWORD");
+                "PASSWORD",
+                X509KeyStorageFlags.EphemeralKeySet);
 
         public static RSA PublicKey => _publicKey;
 
