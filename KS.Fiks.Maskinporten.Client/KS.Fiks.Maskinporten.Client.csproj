@@ -13,7 +13,7 @@
         <PackageIcon>KS.png</PackageIcon>
         <RepositoryType>git</RepositoryType>
         <PackageTags>FIKS</PackageTags>
-        <VersionPrefix>1.1.12</VersionPrefix>
+        <VersionPrefix>1.2.0</VersionPrefix>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <IncludeSymbols>true</IncludeSymbols>

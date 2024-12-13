@@ -66,8 +66,8 @@ namespace ExampleApplication
 
             var cert = new X509Certificate2(p12Filename, p12Password);
             var configuration = new MaskinportenClientConfiguration(
-                @"https://ver2.maskinporten.no/", // ID-porten audience path
-                @"https://ver2.maskinporten.no/token", // ID-porten token path
+                @"https://test.maskinporten.no/", // ID-porten audience path
+                @"https://test.maskinporten.no/token", // ID-porten token path
                 issuer, // Issuer name
                 10, // The token will be refreshed 10 seconds before it expires
                 cert);
@@ -80,7 +80,7 @@ namespace ExampleApplication
         private static async Task ValidateToken(MaskinportenToken token)
         {
             using var client = new HttpClient();
-            var json = await client.GetStringAsync("https://ver2.maskinporten.no/jwk");
+            var json = await client.GetStringAsync("https://test.maskinporten.no/jwk");
             var jwks = new JsonWebKeySet(json);
             var jwk = jwks.Keys.First();
 
@@ -90,7 +90,7 @@ namespace ExampleApplication
                 ValidateAudience = false,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = "https://ver2.maskinporten.no/",
+                ValidIssuer = "https://test.maskinporten.no/",
                 IssuerSigningKey = jwk
             };
 
