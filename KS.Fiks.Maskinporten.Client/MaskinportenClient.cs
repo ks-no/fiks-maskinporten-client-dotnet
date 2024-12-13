@@ -71,6 +71,21 @@ namespace Ks.Fiks.Maskinporten.Client
             }).ConfigureAwait(false);
         }
 
+        public async Task<MaskinportenToken> GetDelegatedAccessTokenForAudience(string consumerOrg, string audience, IEnumerable<string> scopes)
+        {
+            return await GetDelegatedAccessTokenForAudience(consumerOrg, audience, ScopesAsString(scopes)).ConfigureAwait(false);
+        }
+
+        public async Task<MaskinportenToken> GetDelegatedAccessTokenForAudience(string consumerOrg, string audience, string scopes)
+        {
+            return await GetAccessTokenForRequest(new TokenRequest
+            {
+                Audience = audience,
+                Scopes = scopes,
+                ConsumerOrg = consumerOrg
+            }).ConfigureAwait(false);
+        }
+
         public async Task<MaskinportenToken> GetOnBehalfOfAccessToken(string consumerOrg, IEnumerable<string> scopes)
         {
             return await GetOnBehalfOfAccessToken(consumerOrg, ScopesAsString(scopes)).ConfigureAwait(false);

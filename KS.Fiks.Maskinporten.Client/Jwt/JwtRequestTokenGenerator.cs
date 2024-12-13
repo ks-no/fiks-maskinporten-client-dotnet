@@ -32,6 +32,11 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
                 jwtData.Payload.Add("iss_onbehalfof", tokenRequest.OnBehalfOf);
             }
 
+            if (!string.IsNullOrEmpty(tokenRequest.Audience))
+            {
+                jwtData.Payload.Add("resource", tokenRequest.Audience);
+            }
+
             jwtData.Payload.Add("aud", configuration.Audience);
             jwtData.Payload.Add("iat", UnixEpoch.GetSecondsSince(DateTime.UtcNow));
             jwtData.Payload.Add("exp", UnixEpoch.GetSecondsSince(DateTime.UtcNow.AddMinutes(JwtExpireTimeInMinutes)));
