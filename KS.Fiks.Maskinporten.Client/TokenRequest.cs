@@ -29,12 +29,12 @@ namespace Ks.Fiks.Maskinporten.Client.Cache
 
         public override int GetHashCode()
         {
-            return (Scopes, ConsumerOrg, OnBehalfOf).GetHashCode();
+            return (Scopes, ConsumerOrg, OnBehalfOf, Audience).GetHashCode();
         }
 
         private bool Equals(TokenRequest other)
         {
-            return Scopes == other.Scopes && ConsumerOrg == other.ConsumerOrg && OnBehalfOf == other.OnBehalfOf;
+            return Scopes == other.Scopes && ConsumerOrg == other.ConsumerOrg && OnBehalfOf == other.OnBehalfOf && Audience == other.Audience;
         }
     }
 }
