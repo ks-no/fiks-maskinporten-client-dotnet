@@ -59,6 +59,44 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         }
 
         [Fact]
+        public async Task AssertionDeserializedHasCorrectKeyIdentifier()
+        {
+            const string expectedKeyIdentifier = "testKeyIdentifier";
+            var sut = _fixture
+                .WithKeyPair(TestHelper.PublicKey, TestHelper.PrivateKey)
+                .WithKeyIdentifier(expectedKeyIdentifier)
+                .CreateSut();
+
+            await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    TestHelper.DeserializedHeadersInJwt(req, "assertion", "kid",
+                        new RSAlgorithmFactory(TestHelper.PublicKey, TestHelper.PrivateKey)) == expectedKeyIdentifier),
+                ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task AssertionDeserializedDoesNotContainKeyIdentifierWhenNotSet()
+        {
+            var sut = _fixture
+                .WithKeyPair(TestHelper.PublicKey, TestHelper.PrivateKey)
+                .CreateSut();
+
+            await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
+
+            _fixture.HttpMessageHandleMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    TestHelper.JwtHeadersContainsField(req, "assertion", "kid",
+                        new RSAlgorithmFactory(TestHelper.PublicKey, TestHelper.PrivateKey)) == false),
+                ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
         public async Task ReturnsAccesstokenWithNonemptyFields()
         {
             var sut = _fixture.CreateSut();
@@ -126,9 +164,12 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             const string audience = "https://localhost/api";
             var sut = _fixture.CreateSut();
 
-            await sut.GetDelegatedAccessTokenForAudience("999888999", audience, _fixture.DefaultScopes).ConfigureAwait(false);
+            await sut.GetDelegatedAccessTokenForAudience("999888999", audience, _fixture.DefaultScopes)
+                .ConfigureAwait(false);
 
-            var requestMessage = _fixture.HttpMessageHandleMock.Invocations.Single().Arguments.Single(o => o is HttpRequestMessage) as HttpRequestMessage;
+            var requestMessage =
+                _fixture.HttpMessageHandleMock.Invocations.Single().Arguments.Single(o => o is HttpRequestMessage) as
+                    HttpRequestMessage;
             requestMessage?.Content.Should().NotBeNull();
 
             var requestContent = await requestMessage!.Content!.ReadAsStringAsync().ConfigureAwait(false);
@@ -450,7 +491,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var sut = _fixture.WithStatusCode(statusCode).CreateSut();
 
             await Assert.ThrowsAsync<UnexpectedResponseException>(
-                async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false)).ConfigureAwait(false);
+                    async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false))
+                .ConfigureAwait(false);
         }
     }
 }
