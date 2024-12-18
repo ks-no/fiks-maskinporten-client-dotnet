@@ -59,10 +59,15 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             return this;
         }
 
-        public MaskinportenClientFixture WithKeyPair(RSA publicKey, RSA privateKey, string? keyIdentifier = null)
+        public MaskinportenClientFixture WithKeyPair(RSA publicKey, RSA privateKey)
         {
             _publicKey = publicKey;
             _privateKey = privateKey;
+            return this;
+        }
+
+        public MaskinportenClientFixture WithKeyIdentifier(string keyIdentifier)
+        {
             _keyIdentifier = keyIdentifier;
             return this;
         }

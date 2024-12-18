@@ -13,8 +13,8 @@
         <PackageIcon>KS.png</PackageIcon>
         <RepositoryType>git</RepositoryType>
         <PackageTags>FIKS</PackageTags>
-        <VersionPrefix>1.2.1</VersionPrefix>
-        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+        <VersionPrefix>2.0.0</VersionPrefix>
+        <TargetFrameworks>netstandard2.0;netstandard2.1;net8.0</TargetFrameworks>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>

@@ -31,7 +31,9 @@ namespace Ks.Fiks.Maskinporten.Client
             _tokenCache = new TokenCache();
             if (_configuration.Certificate != null)
             {
-                _tokenGenerator = new JwtRequestTokenGenerator(_configuration.Certificate);
+                _tokenGenerator = new JwtRequestTokenGenerator(
+                    _configuration.Certificate,
+                    _configuration.KeyIdentifier);
             }
             else
             {
@@ -71,12 +73,15 @@ namespace Ks.Fiks.Maskinporten.Client
             }).ConfigureAwait(false);
         }
 
-        public async Task<MaskinportenToken> GetDelegatedAccessTokenForAudience(string consumerOrg, string audience, IEnumerable<string> scopes)
+        public async Task<MaskinportenToken> GetDelegatedAccessTokenForAudience(string consumerOrg, string audience,
+            IEnumerable<string> scopes)
         {
-            return await GetDelegatedAccessTokenForAudience(consumerOrg, audience, ScopesAsString(scopes)).ConfigureAwait(false);
+            return await GetDelegatedAccessTokenForAudience(consumerOrg, audience, ScopesAsString(scopes))
+                .ConfigureAwait(false);
         }
 
-        public async Task<MaskinportenToken> GetDelegatedAccessTokenForAudience(string consumerOrg, string audience, string scopes)
+        public async Task<MaskinportenToken> GetDelegatedAccessTokenForAudience(string consumerOrg, string audience,
+            string scopes)
         {
             return await GetAccessTokenForRequest(new TokenRequest
             {
@@ -144,7 +149,8 @@ namespace Ks.Fiks.Maskinporten.Client
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>()
             {
                 new KeyValuePair<string, string>("grant_type", GrantType),
-                new KeyValuePair<string, string>("assertion", _tokenGenerator.CreateEncodedJwt(tokenRequest, _configuration))
+                new KeyValuePair<string, string>("assertion",
+                    _tokenGenerator.CreateEncodedJwt(tokenRequest, _configuration))
             });
 
             var consumerOrg = tokenRequest.ConsumerOrg ?? this._configuration.ConsumerOrg;
