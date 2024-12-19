@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using KS.Fiks.Maskinporten.Client;
 
 namespace Ks.Fiks.Maskinporten.Client.Cache
 {

@@ -1,4 +1,4 @@
-using Ks.Fiks.Maskinporten.Client.Cache;
+using KS.Fiks.Maskinporten.Client;
 
 namespace Ks.Fiks.Maskinporten.Client.Jwt
 {

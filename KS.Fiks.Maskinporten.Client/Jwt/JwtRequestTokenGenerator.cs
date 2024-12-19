@@ -6,7 +6,7 @@ using JWT;
 using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Serializers;
-using Ks.Fiks.Maskinporten.Client.Cache;
+using KS.Fiks.Maskinporten.Client;
 
 namespace Ks.Fiks.Maskinporten.Client.Jwt
 {
@@ -27,14 +27,19 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
 
             jwtData.Payload.Add("iss", configuration.Issuer);
 
-            if (!string.IsNullOrEmpty(tokenRequest.OnBehalfOf))
+            if (!string.IsNullOrWhiteSpace(tokenRequest.OnBehalfOf))
             {
                 jwtData.Payload.Add("iss_onbehalfof", tokenRequest.OnBehalfOf);
             }
 
-            if (!string.IsNullOrEmpty(tokenRequest.Audience))
+            if (!string.IsNullOrWhiteSpace(tokenRequest.Audience))
             {
                 jwtData.Payload.Add("resource", tokenRequest.Audience);
+            }
+
+            if (!string.IsNullOrWhiteSpace(tokenRequest.PersonIdentifier))
+            {
+                jwtData.Payload.Add("pid", tokenRequest.PersonIdentifier);
             }
 
             jwtData.Payload.Add("aud", configuration.Audience);

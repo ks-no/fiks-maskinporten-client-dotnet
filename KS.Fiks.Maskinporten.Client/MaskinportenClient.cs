@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using KS.Fiks.Maskinporten.Client;
 using Ks.Fiks.Maskinporten.Client.Cache;
 using Ks.Fiks.Maskinporten.Client.Jwt;
 using Newtonsoft.Json;
