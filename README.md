@@ -69,6 +69,20 @@ var maskinportenClient = new MaskinportenClient(maskinportenConfig);
 var scope = "ks:fiks"; // Scope for access token
 var accessToken = await maskinportenClient.GetAccessToken(scope);
 ```
+
+### Get access token using TokenRequest builder
+```c#
+var tokenRequest = new TokenRequestBuilder()
+    .WithScopes("ks:fiks") // Scope for access token
+    .WithConsumerOrg("123456789") // Official 9 digit organization number for an organization that has delegated access to you in ALTINN
+    .WithOnBehalfOf("123456789") // Official 9 digit organization number for an organization that has delegated access to you in ALTINN
+    .WithAudience("https://some/api") // 'resource' claim in the JWT grant and 'aud' claim in the resulting access token
+    .WithPid("12345678901") // Personal indentification number of the intended subject of the subsequent API calls
+    .Build();
+
+var accessToken = await maskinportenClient.GetAccessToken(tokenRequest);
+```
+
 ### Get delegated access token 
 ```c#
 var scope = "ks:fiks"; // Scope for access token
