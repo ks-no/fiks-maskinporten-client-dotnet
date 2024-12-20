@@ -37,9 +37,9 @@ namespace Ks.Fiks.Maskinporten.Client.Jwt
                 jwtData.Payload.Add("resource", tokenRequest.Audience);
             }
 
-            if (!string.IsNullOrWhiteSpace(tokenRequest.PersonIdentifier))
+            if (!string.IsNullOrWhiteSpace(tokenRequest.Pid))
             {
-                jwtData.Payload.Add("pid", tokenRequest.PersonIdentifier);
+                jwtData.Payload.Add("pid", tokenRequest.Pid);
             }
 
             jwtData.Payload.Add("aud", configuration.Audience);

@@ -16,11 +16,11 @@ namespace Ks.Fiks.Maskinporten.Client
         private const string GrantType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
         private const string MediaTypeFromUrl = "application/x-www-form-urlencoded";
         private const string CharsetUtf8 = "utf-8";
+
         private readonly MaskinportenClientConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
         private readonly IJwtRequestTokenGenerator _tokenGenerator;
-
         private readonly ITokenCache _tokenCache;
 
         public MaskinportenClient(
@@ -43,6 +43,11 @@ namespace Ks.Fiks.Maskinporten.Client
                     _configuration.PrivateKey,
                     _configuration.KeyIdentifier);
             }
+        }
+
+        public async Task<MaskinportenToken> GetAccessToken(TokenRequest tokenRequest)
+        {
+            return await GetAccessTokenForRequest(tokenRequest).ConfigureAwait(false);
         }
 
         public async Task<MaskinportenToken> GetAccessToken(IEnumerable<string> scopes)

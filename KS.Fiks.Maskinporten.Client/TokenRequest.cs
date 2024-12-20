@@ -10,11 +10,7 @@ namespace KS.Fiks.Maskinporten.Client
 
         public string Audience { get; set; }
 
-        /// <summary>
-        /// Optional person identifier for end user restricted tokens.
-        /// Contains 11 digits and will end up in the "pid" claim on the JWT token.
-        /// </summary>
-        public string PersonIdentifier { get; set; }
+        public string Pid { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -33,13 +29,13 @@ namespace KS.Fiks.Maskinporten.Client
 
         public override int GetHashCode()
         {
-            return (Scopes, ConsumerOrg, OnBehalfOf, Audience, PersonIdentifier).GetHashCode();
+            return (Scopes, ConsumerOrg, OnBehalfOf, Audience, Pid).GetHashCode();
         }
 
         private bool Equals(TokenRequest other)
         {
-            return (Scopes, ConsumerOrg, OnBehalfOf, Audience, PersonIdentifier) ==
-                   (other.Scopes, other.ConsumerOrg, other.OnBehalfOf, other.Audience, other.PersonIdentifier);
+            return (Scopes, ConsumerOrg, OnBehalfOf, Audience, Pid) ==
+                   (other.Scopes, other.ConsumerOrg, other.OnBehalfOf, other.Audience, other.Pid);
         }
     }
 }
