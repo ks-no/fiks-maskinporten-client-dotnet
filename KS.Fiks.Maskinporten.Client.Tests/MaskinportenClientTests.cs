@@ -9,6 +9,7 @@ using JWT;
 using JWT.Algorithms;
 using JWT.Exceptions;
 using JWT.Serializers;
+using KS.Fiks.Maskinporten.Client.Builder;
 using Moq;
 using Moq.Protected;
 using Xunit;
@@ -17,12 +18,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests;
 
 public class MaskinportenClientTests
 {
-    private MaskinportenClientFixture _fixture;
-
-    public MaskinportenClientTests()
-    {
-        _fixture = new MaskinportenClientFixture();
-    }
+    private readonly MaskinportenClientFixture _fixture = new();
 
     [Fact]
     public async Task ReturnsAccessToken()
@@ -493,5 +489,51 @@ public class MaskinportenClientTests
         await Assert.ThrowsAsync<UnexpectedResponseException>(
                 async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false))
             .ConfigureAwait(false);
+    }
+
+    [Fact]
+    public async Task GetAccessTokenWithEmptyBuilderReturnsToken()
+    {
+        var sut = _fixture.CreateSut();
+        var tokenRequest = new TokenRequestBuilder().Build();
+
+        var token = await sut.GetAccessToken(tokenRequest).ConfigureAwait(false);
+
+        token.Should().BeOfType<MaskinportenToken>();
+    }
+
+    [Fact]
+    public async Task GetAccessTokenWithBuilderReturnsToken()
+    {
+        var sut = _fixture.CreateSut();
+        var tokenRequest = new TokenRequestBuilder()
+            .WithScopes("testscope")
+            .WithConsumerOrg("testorg")
+            .WithOnBehalfOf("testonbehalfof")
+            .WithAudience("testaudience")
+            .WithPid("testpid")
+            .Build();
+
+        var token = await sut.GetAccessToken(tokenRequest).ConfigureAwait(false);
+
+        token.Should().BeOfType<MaskinportenToken>();
+    }
+
+    [Fact]
+    public void TokenRequestBuilderSetsValuesCorrectly()
+    {
+        var tokenRequest = new TokenRequestBuilder()
+            .WithScopes(["testscope1", "testscope2"])
+            .WithConsumerOrg("testorg")
+            .WithOnBehalfOf("testonbehalfof")
+            .WithAudience("testaudience")
+            .WithPid("testpid")
+            .Build();
+
+        tokenRequest.Scopes.Should().Be("testscope1 testscope2");
+        tokenRequest.ConsumerOrg.Should().Be("testorg");
+        tokenRequest.OnBehalfOf.Should().Be("testonbehalfof");
+        tokenRequest.Audience.Should().Be("testaudience");
+        tokenRequest.Pid.Should().Be("testpid");
     }
 }

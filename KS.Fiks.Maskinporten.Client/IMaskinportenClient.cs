@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KS.Fiks.Maskinporten.Client;
 
 namespace Ks.Fiks.Maskinporten.Client
 {
     public interface IMaskinportenClient
     {
+        Task<MaskinportenToken> GetAccessToken(TokenRequest tokenRequest);
+
         Task<MaskinportenToken> GetAccessToken(IEnumerable<string> scopes);
 
         Task<MaskinportenToken> GetAccessToken(string scopes);
