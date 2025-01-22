@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
 using JWT;
 using JWT.Algorithms;
 using JWT.Exceptions;
@@ -12,6 +11,7 @@ using JWT.Serializers;
 using KS.Fiks.Maskinporten.Client.Builder;
 using Moq;
 using Moq.Protected;
+using Shouldly;
 using Xunit;
 
 namespace Ks.Fiks.Maskinporten.Client.Tests;
@@ -26,7 +26,7 @@ public class MaskinportenClientTests
         var sut = _fixture.CreateSut();
 
         var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
-        accessToken.Should().BeOfType<MaskinportenToken>();
+        accessToken.ShouldBeOfType<MaskinportenToken>();
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class MaskinportenClientTests
             .CreateSut();
 
         var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
-        accessToken.Should().BeOfType<MaskinportenToken>();
+        accessToken.ShouldBeOfType<MaskinportenToken>();
 
         // This verifies that the audience field is encrypted by the sut av possible to decrypt using key pair.
         _fixture.HttpMessageHandleMock.Protected().Verify(
@@ -99,7 +99,7 @@ public class MaskinportenClientTests
 
         var accessToken = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
-        accessToken.Token.Should().NotBeEmpty();
+        accessToken.Token.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public class MaskinportenClientTests
         await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
         var token2 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
-        token1.Should().Be(token2);
+        token1.ShouldBe(token2);
         _fixture.HttpMessageHandleMock.Protected().Verify(
             "SendAsync",
             Times.Exactly(1),
@@ -146,7 +146,7 @@ public class MaskinportenClientTests
         await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
         var token2 = await sut.GetDelegatedAccessToken(consumerOrg, _fixture.DefaultScopes).ConfigureAwait(false);
 
-        token1.Should().Be(token2);
+        token1.ShouldBe(token2);
         _fixture.HttpMessageHandleMock.Protected().Verify(
             "SendAsync",
             Times.Exactly(1),
@@ -166,7 +166,7 @@ public class MaskinportenClientTests
         var requestMessage =
             _fixture.HttpMessageHandleMock.Invocations.Single().Arguments.Single(o => o is HttpRequestMessage) as
                 HttpRequestMessage;
-        requestMessage?.Content.Should().NotBeNull();
+        requestMessage?.Content.ShouldNotBeNull();
 
         var requestContent = await requestMessage!.Content!.ReadAsStringAsync().ConfigureAwait(false);
         var contentDict = requestContent.Split("&").Select(p => p.Split("=")).ToDictionary(_ => _[0], _ => _[1]);
@@ -176,7 +176,7 @@ public class MaskinportenClientTests
             new JwtBase64UrlEncoder());
 
         var assertionData = decoder.DecodeToObject(contentDict["assertion"], false);
-        assertionData["resource"].Should().Be(audience);
+        assertionData["resource"].ShouldBe(audience);
     }
 
     [Fact]
@@ -188,7 +188,7 @@ public class MaskinportenClientTests
         await Task.Delay(TimeSpan.FromMilliseconds(1100)).ConfigureAwait(false);
         var token2 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
-        token1.Should().Be(token2);
+        token1.ShouldBe(token2);
         _fixture.HttpMessageHandleMock.Protected().Verify(
             "SendAsync",
             Times.Exactly(2),
@@ -205,7 +205,7 @@ public class MaskinportenClientTests
         await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
         var token2 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
-        token1.Should().Be(token2);
+        token1.ShouldBe(token2);
         _fixture.HttpMessageHandleMock.Protected().Verify(
             "SendAsync",
             Times.Exactly(1),
@@ -222,7 +222,7 @@ public class MaskinportenClientTests
         await Task.Delay(TimeSpan.FromMilliseconds(1100)).ConfigureAwait(false);
         var token2 = await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false);
 
-        token1.Should().Be(token2);
+        token1.ShouldBe(token2);
         _fixture.HttpMessageHandleMock.Protected().Verify(
             "SendAsync",
             Times.Exactly(2),
@@ -498,8 +498,7 @@ public class MaskinportenClientTests
         var tokenRequest = new TokenRequestBuilder().Build();
 
         var token = await sut.GetAccessToken(tokenRequest).ConfigureAwait(false);
-
-        token.Should().BeOfType<MaskinportenToken>();
+        token.ShouldBeOfType<MaskinportenToken>();
     }
 
     [Fact]
@@ -516,7 +515,7 @@ public class MaskinportenClientTests
 
         var token = await sut.GetAccessToken(tokenRequest).ConfigureAwait(false);
 
-        token.Should().BeOfType<MaskinportenToken>();
+        token.ShouldBeOfType<MaskinportenToken>();
     }
 
     [Fact]
@@ -530,10 +529,10 @@ public class MaskinportenClientTests
             .WithPid("testpid")
             .Build();
 
-        tokenRequest.Scopes.Should().Be("testscope1 testscope2");
-        tokenRequest.ConsumerOrg.Should().Be("testorg");
-        tokenRequest.OnBehalfOf.Should().Be("testonbehalfof");
-        tokenRequest.Audience.Should().Be("testaudience");
-        tokenRequest.Pid.Should().Be("testpid");
+        tokenRequest.Scopes.ShouldBe("testscope1 testscope2");
+        tokenRequest.ConsumerOrg.ShouldBe("testorg");
+        tokenRequest.OnBehalfOf.ShouldBe("testonbehalfof");
+        tokenRequest.Audience.ShouldBe("testaudience");
+        tokenRequest.Pid.ShouldBe("testpid");
     }
 }

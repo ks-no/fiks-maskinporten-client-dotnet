@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using FluentAssertions;
 using KS.Fiks.Maskinporten.Client;
+using Shouldly;
 using Xunit;
 
 namespace Ks.Fiks.Maskinporten.Client.Tests.Cache;
@@ -24,7 +24,7 @@ public class TokenCacheTests
 
         var actualValue = await sut.GetToken(new TokenRequest { Scopes = "key"}, () => Task.FromResult(expectedValue)).ConfigureAwait(false);
 
-        actualValue.Should().Be(expectedValue);
+        actualValue.ShouldBe(expectedValue);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class TokenCacheTests
         await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
         var secondValue = await sut.GetToken(new TokenRequest { Scopes = "key"}, () => Task.FromResult(otherValue)).ConfigureAwait(false);
 
-        secondValue.Should().Be(expectedValue);
+        secondValue.ShouldBe(expectedValue);
     }
 
     [Fact]
@@ -54,6 +54,6 @@ public class TokenCacheTests
         await Task.Delay(TimeSpan.FromMilliseconds(1500)).ConfigureAwait(false);
         var secondValue = await sut.GetToken(new TokenRequest { Scopes = "key"}, () => Task.FromResult(expectedValue)).ConfigureAwait(false);
 
-        secondValue.Should().Be(expectedValue);
+        secondValue.ShouldBe(expectedValue);
     }
 }
