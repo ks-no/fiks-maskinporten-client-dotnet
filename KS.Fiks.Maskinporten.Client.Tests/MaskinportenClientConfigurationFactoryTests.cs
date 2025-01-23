@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace Ks.Fiks.Maskinporten.Client.Tests
@@ -12,11 +12,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             const string issuer = "issuer";
             var certificate = TestHelper.Certificate;
             var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateVer2Configuration(issuer, certificate);
-            maskinportenClientConfiguration.TokenEndpoint.Should()
-                .Be(MaskinportenClientConfigurationFactory.VER2_TOKEN_ENDPOINT);
-            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.VER2_AUDIENCE);
-            maskinportenClientConfiguration.Issuer.Should().Be(issuer);
-            maskinportenClientConfiguration.Certificate.Should().Be(certificate);
+            maskinportenClientConfiguration.TokenEndpoint.ShouldBe(MaskinportenClientConfigurationFactory.VER2_TOKEN_ENDPOINT);
+            maskinportenClientConfiguration.Audience.ShouldBe(MaskinportenClientConfigurationFactory.VER2_AUDIENCE);
+            maskinportenClientConfiguration.Issuer.ShouldBe(issuer);
+            maskinportenClientConfiguration.Certificate.ShouldBe(certificate);
 #pragma warning restore CS0618 // Type or member is obsolete
         }
 
@@ -26,11 +25,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             const string issuer = "issuer";
             var certificate = TestHelper.Certificate;
             var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateTestConfiguration(issuer, certificate);
-            maskinportenClientConfiguration.TokenEndpoint.Should()
-                .Be(MaskinportenClientConfigurationFactory.TEST_TOKEN_ENDPOINT);
-            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.TEST_AUDIENCE);
-            maskinportenClientConfiguration.Issuer.Should().Be(issuer);
-            maskinportenClientConfiguration.Certificate.Should().Be(certificate);
+            maskinportenClientConfiguration.TokenEndpoint.ShouldBe(MaskinportenClientConfigurationFactory.TEST_TOKEN_ENDPOINT);
+            maskinportenClientConfiguration.Audience.ShouldBe(MaskinportenClientConfigurationFactory.TEST_AUDIENCE);
+            maskinportenClientConfiguration.Issuer.ShouldBe(issuer);
+            maskinportenClientConfiguration.Certificate.ShouldBe(certificate);
         }
         
         [Fact]
@@ -45,13 +43,12 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 privateKey: privateKey,
                 publicKey: publicKey,
                 keyIdentifier: keyIdentifier);
-            maskinportenClientConfiguration.TokenEndpoint.Should()
-                .Be(MaskinportenClientConfigurationFactory.TEST_TOKEN_ENDPOINT);
-            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.TEST_AUDIENCE);
-            maskinportenClientConfiguration.Issuer.Should().Be(issuer);
-            maskinportenClientConfiguration.PrivateKey.Should().BeEquivalentTo(privateKey);
-            maskinportenClientConfiguration.PublicKey.Should().BeEquivalentTo(publicKey);
-            maskinportenClientConfiguration.KeyIdentifier.Should().Be(keyIdentifier);
+            maskinportenClientConfiguration.TokenEndpoint.ShouldBe(MaskinportenClientConfigurationFactory.TEST_TOKEN_ENDPOINT);
+            maskinportenClientConfiguration.Audience.ShouldBe(MaskinportenClientConfigurationFactory.TEST_AUDIENCE);
+            maskinportenClientConfiguration.Issuer.ShouldBe(issuer);
+            maskinportenClientConfiguration.PrivateKey.ShouldBeEquivalentTo(privateKey);
+            maskinportenClientConfiguration.PublicKey.ShouldBeEquivalentTo(publicKey);
+            maskinportenClientConfiguration.KeyIdentifier.ShouldBe(keyIdentifier);
         }
 
         [Fact]
@@ -60,11 +57,10 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             const string issuer = "issuer";
             var certificate = TestHelper.Certificate;
             var maskinportenClientConfiguration = MaskinportenClientConfigurationFactory.CreateProdConfiguration(issuer, certificate);
-            maskinportenClientConfiguration.TokenEndpoint.Should()
-                .Be(MaskinportenClientConfigurationFactory.PROD_TOKEN_ENDPOINT);
-            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.PROD_AUDIENCE);
-            maskinportenClientConfiguration.Issuer.Should().Be(issuer);
-            maskinportenClientConfiguration.Certificate.Should().Be(certificate);
+            maskinportenClientConfiguration.TokenEndpoint.ShouldBe(MaskinportenClientConfigurationFactory.PROD_TOKEN_ENDPOINT);
+            maskinportenClientConfiguration.Audience.ShouldBe(MaskinportenClientConfigurationFactory.PROD_AUDIENCE);
+            maskinportenClientConfiguration.Issuer.ShouldBe(issuer);
+            maskinportenClientConfiguration.Certificate.ShouldBe(certificate);
         }
 
         [Fact]
@@ -79,13 +75,12 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                 privateKey: privateKey,
                 publicKey: publicKey,
                 keyIdentifier: keyIdentifier);
-            maskinportenClientConfiguration.TokenEndpoint.Should()
-                .Be(MaskinportenClientConfigurationFactory.PROD_TOKEN_ENDPOINT);
-            maskinportenClientConfiguration.Audience.Should().Be(MaskinportenClientConfigurationFactory.PROD_AUDIENCE);
-            maskinportenClientConfiguration.Issuer.Should().Be(issuer);
-            maskinportenClientConfiguration.PrivateKey.Should().BeEquivalentTo(privateKey);
-            maskinportenClientConfiguration.PublicKey.Should().BeEquivalentTo(publicKey);
-            maskinportenClientConfiguration.KeyIdentifier.Should().Be(keyIdentifier);
+            maskinportenClientConfiguration.TokenEndpoint.ShouldBe(MaskinportenClientConfigurationFactory.PROD_TOKEN_ENDPOINT);
+            maskinportenClientConfiguration.Audience.ShouldBe(MaskinportenClientConfigurationFactory.PROD_AUDIENCE);
+            maskinportenClientConfiguration.Issuer.ShouldBe(issuer);
+            maskinportenClientConfiguration.PrivateKey.ShouldBeEquivalentTo(privateKey);
+            maskinportenClientConfiguration.PublicKey.ShouldBeEquivalentTo(publicKey);
+            maskinportenClientConfiguration.KeyIdentifier.ShouldBe(keyIdentifier);
         }
     }
 }
