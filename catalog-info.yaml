@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: fiks-maskinporten-client-dotnet
+  title: Fiks maskinporten-client-dotnet
+  description: >
+    .NET-bibliotek for Maskinporten-autentisering og autorisasjon.
+  annotations:
+    github.com/project-slug: ks-no/fiks-maskinporten-client-dotnet
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - dotnet
+    - maskinporten
+    - oauth
+spec:
+  type: library
+  owner: group:team-tilgang
+  lifecycle: production
