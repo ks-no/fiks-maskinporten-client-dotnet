@@ -67,9 +67,9 @@ jobs:
       specified-version: ${{ inputs.specifiedVersion || '' }}
       release-notes: ${{ inputs.releaseNotes || 'No changes specified' }}
       reviewer: ${{ inputs.reviewer || 'No review required' }}
-      integration-test-repo: fiks-io-client-dotnet-integration-tests
+      integration-test-repo: fiks-maskinporten-client-dotnet-integration-tests
       integration-test-workflow: dotnet-component-test-pipeline-windows.yml
-      integration-test-package-name: KS.Fiks.IO.Client
+      integration-test-package-name: KS.Fiks.Maskinporten.Client
     secrets: inherit
 
   publish:
