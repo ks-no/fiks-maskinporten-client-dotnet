@@ -17,7 +17,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
     {
         private HttpStatusCode _statusCode = HttpStatusCode.OK;
         private bool _useIncorrectCertificate = false;
-        private long _expirationTime;
+        private JToken _expirationTime = 120;
+        private string? _responseBody = null;
         private string _tokenEndpoint = "http://test.no";
         private int _numberOfSecondsLeftBeforeExpire = 1;
         private string _audience = "testAudience";
@@ -37,6 +38,8 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         public MaskinportenClientConfiguration Configuration { get; private set; }
 
         public List<string> DefaultScopes { get; private set; }
+
+        public string? ResponseAccessToken { get; private set; }
 
         public MaskinportenClient CreateSut()
         {
@@ -109,9 +112,20 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             return this;
         }
 
+        public MaskinportenClientFixture WithRawExpiresIn(JToken rawExpiresIn)
+        {
+            _expirationTime = rawExpiresIn;
+            return this;
+        }
+
+        public MaskinportenClientFixture WithResponseBody(string responseBody)
+        {
+            _responseBody = responseBody;
+            return this;
+        }
+
         private void SetDefaultValues()
         {
-            _expirationTime = 120;
             DefaultScopes = new List<string>();
         }
 
@@ -146,7 +160,7 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
             var responseMessage = new HttpResponseMessage()
             {
                 StatusCode = _statusCode,
-                Content = new StringContent(GenerateJsonResponse()),
+                Content = new StringContent(_responseBody ?? GenerateJsonResponse()),
             };
 
             HttpMessageHandleMock = new Mock<HttpMessageHandler>();
@@ -163,9 +177,6 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
         private string GenerateJsonResponse()
         {
             const string KeyIdentifier = "some-key";
-            dynamic response = new JObject();
-            response.Add("expires_in", _expirationTime);
-
             var tokenResponse = new Dictionary<string, object>
             {
                 {"aud", "test-aud"},
@@ -193,8 +204,12 @@ namespace Ks.Fiks.Maskinporten.Client.Tests
                     new RS256Algorithm(_publicKey, _privateKey));
             }
 
-            response.Add("access_token", encodedToken);
-            return response.ToString();
+            ResponseAccessToken = encodedToken;
+            return new JObject
+            {
+                ["access_token"] = encodedToken,
+                ["expires_in"] = _expirationTime,
+            }.ToString();
         }
     }
 }

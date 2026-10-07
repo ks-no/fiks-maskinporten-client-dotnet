@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -177,8 +178,45 @@ namespace Ks.Fiks.Maskinporten.Client
             {
                 var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 throw new UnexpectedResponseException(
-                    $"Got unexpected HTTP Status code {response.StatusCode} from {_configuration.TokenEndpoint}. Content: {content}.");
+                    $"Got unexpected HTTP Status code {response.StatusCode} from {_configuration.TokenEndpoint}.{DescribeError(content)}");
             }
+        }
+
+        // Put only the OAuth2 error fields in the message. The raw body may contain tokens or other secrets.
+        private static string DescribeError(string content)
+        {
+            MaskinportenErrorResponse errorResponse;
+            try
+            {
+                // JsonSerializer.Create ignores JsonConvert.DefaultSettings from the host application. Thus a converter
+                // from the host cannot change the parsed result or cause an exception of a different type.
+                using (var reader = new JsonTextReader(new StringReader(content)))
+                {
+                    errorResponse = JsonSerializer.Create().Deserialize<MaskinportenErrorResponse>(reader);
+                }
+            }
+            catch (JsonException)
+            {
+                return string.Empty;
+            }
+
+            if (errorResponse == null)
+            {
+                return string.Empty;
+            }
+
+            var description = string.Empty;
+            if (!string.IsNullOrEmpty(errorResponse.Error))
+            {
+                description += $" Error: \"{errorResponse.Error}\".";
+            }
+
+            if (!string.IsNullOrEmpty(errorResponse.ErrorDescription))
+            {
+                description += $" Error description: \"{errorResponse.ErrorDescription}\".";
+            }
+
+            return description;
         }
 
         private async Task<MaskinportenToken> CreateTokenFromResponse(HttpResponseMessage response)
