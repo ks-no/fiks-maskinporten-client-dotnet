@@ -11,6 +11,8 @@ using JWT.Serializers;
 using KS.Fiks.Maskinporten.Client.Builder;
 using Moq;
 using Moq.Protected;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
 
@@ -482,13 +484,72 @@ public class MaskinportenClientTests
     [InlineData(HttpStatusCode.NoContent)]
     [InlineData(HttpStatusCode.Redirect)]
     [InlineData(HttpStatusCode.Forbidden)]
-    public async Task ThrowsExceptionIfStatusCodeIsNot200(HttpStatusCode statusCode)
+    [InlineData(HttpStatusCode.Created)]
+    [InlineData(HttpStatusCode.NonAuthoritativeInformation)]
+    public async Task ThrowsExceptionWithoutAccessTokenIfStatusCodeIsNot200(HttpStatusCode statusCode)
     {
         var sut = _fixture.WithStatusCode(statusCode).CreateSut();
 
-        await Assert.ThrowsAsync<UnexpectedResponseException>(
+        var exception = await Assert.ThrowsAsync<UnexpectedResponseException>(
                 async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false))
             .ConfigureAwait(false);
+
+        exception.ToString().ShouldNotContain(_fixture.ResponseAccessToken);
+    }
+
+    [Theory]
+    [InlineData("\"abc\"")]
+    [InlineData("null")]
+    [InlineData("1.5")]
+    [InlineData("99999999999")]
+    [InlineData("true")]
+    [InlineData("{}")]
+    [InlineData("[]")]
+    public async Task BrokenExpiresInDoesNotLeakAccessToken(string rawExpiresIn)
+    {
+        var sut = _fixture.WithRawExpiresIn(JToken.Parse(rawExpiresIn)).CreateSut();
+
+        var exception = await Assert.ThrowsAnyAsync<JsonException>(
+                async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false))
+            .ConfigureAwait(false);
+
+        exception.ToString().ShouldNotContain(_fixture.ResponseAccessToken);
+    }
+
+    [Fact]
+    public async Task NonOkResponseWithNonJsonBodyOmitsBody()
+    {
+        const string Secret = "SENTINEL-SECRET";
+        var sut = _fixture
+            .WithStatusCode(HttpStatusCode.BadGateway)
+            .WithResponseBody($"<html>{Secret}</html>")
+            .CreateSut();
+
+        var exception = await Assert.ThrowsAsync<UnexpectedResponseException>(
+                async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false))
+            .ConfigureAwait(false);
+
+        exception.ToString().ShouldNotContain(Secret);
+    }
+
+    [Fact]
+    public async Task NonOkResponseIncludesOnlyMaskinportenErrorFields()
+    {
+        const string Secret = "SENTINEL-SECRET";
+        var sut = _fixture
+            .WithStatusCode(HttpStatusCode.BadRequest)
+            .WithResponseBody($"{{\"error\":\"invalid_grant\",\"error_description\":\"Invalid assertion\",\"access_token\":\"{Secret}\"}}")
+            .CreateSut();
+
+        var exception = await Assert.ThrowsAsync<UnexpectedResponseException>(
+                async () => await sut.GetAccessToken(_fixture.DefaultScopes).ConfigureAwait(false))
+            .ConfigureAwait(false);
+
+        exception.Message.ShouldContain("BadRequest");
+        exception.Message.ShouldContain(_fixture.Configuration.TokenEndpoint);
+        exception.Message.ShouldContain("invalid_grant");
+        exception.Message.ShouldContain("Invalid assertion");
+        exception.ToString().ShouldNotContain(Secret);
     }
 
     [Fact]
