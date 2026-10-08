@@ -1,0 +1,146 @@
+name: .NET Library Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      isRelease:
+        description: 'Release build? (signs with DigiCert KeyLocker and publishes to nuget.org)'
+        type: boolean
+        required: false
+        default: false
+      pushToNugetOrg:
+        description: 'Push an unsigned pre-release to nuget.org?'
+        type: boolean
+        required: false
+        default: false
+      publishMode:
+        description: 'Auth for nuget.org push: api-key (NUGET_API_KEY, default) or oidc (trusted publishing)'
+        type: choice
+        required: false
+        default: 'api-key'
+        options:
+          - oidc
+          - api-key
+      specifiedVersion:
+        description: 'Version (X.X.X) - leave empty for auto'
+        required: false
+        default: ''
+      releaseNotes:
+        description: 'Release notes'
+        required: false
+        default: 'No changes specified'
+      reviewer:
+        description: 'Reviewer name'
+        required: false
+        default: 'No review required'
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: write
+  checks: write
+  id-token: write
+
+jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Require NUGET_API_KEY when publishMode=api-key
+        if: github.event_name == 'workflow_dispatch' && inputs.publishMode == 'api-key'
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::error::publishMode=api-key krever secret NUGET_API_KEY"
+            exit 1
+          fi
+
+  build:
+    needs: preflight
+    uses: ks-no/github-actions-public/.github/workflows/dotnet-library-build.yml@main
+    with:
+      is-release: ${{ inputs.isRelease == true }}
+      push-to-nuget-org: ${{ inputs.pushToNugetOrg == true }}
+      specified-version: ${{ inputs.specifiedVersion || '' }}
+      release-notes: ${{ inputs.releaseNotes || 'No changes specified' }}
+      reviewer: ${{ inputs.reviewer || 'No review required' }}
+      integration-test-repo: fiks-maskinporten-client-dotnet-integration-tests
+      integration-test-workflow: dotnet-component-test-pipeline-windows.yml
+      integration-test-package-name: KS.Fiks.Maskinporten.Client
+    secrets: inherit
+
+  publish:
+    name: Publish to NuGet.org
+    needs: build
+    if: |
+      !cancelled() &&
+      needs.build.result == 'success' &&
+      (inputs.isRelease == true || inputs.pushToNugetOrg == true) &&
+      !startsWith(github.ref, 'refs/heads/dependabot/')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download signed packages (release)
+        if: inputs.isRelease == true
+        uses: ks-no/github-actions-public/download-artifact@main
+        with:
+          name: nuget-packages-signed
+          path: packages
+      - name: Download unsigned packages (pre-release)
+        if: inputs.isRelease != true
+        uses: ks-no/github-actions-public/download-artifact@main
+        with:
+          name: nuget-packages-unsigned
+          path: packages
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # 6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Push to NuGet.org (${{ inputs.publishMode || 'api-key' }})
+        uses: ks-no/github-actions-public/dotnet-push-to-nuget-org@main
+        with:
+          mode: ${{ inputs.publishMode || 'api-key' }}
+          nuget-user: ${{ secrets.NUGET_USER }}
+          package-path: packages
+          verify-signature: ${{ inputs.isRelease == true }}
+          api-key: ${{ secrets.NUGET_API_KEY }}
+
+  release:
+    name: Release
+    needs: [build, publish]
+    if: |
+      !cancelled() &&
+      needs.publish.result == 'success' &&
+      inputs.isRelease == true &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up GitHub App
+        id: setup-github-app
+        uses: ks-no/github-actions-public/setup-github-app@main
+        with:
+          ks_github_app_id: ${{ vars.KS_RUNNER_APP_ID }}
+          ks_github_app_private_key: ${{ secrets.KS_RUNNER_PRIVATE_KEY }}
+      - uses: ks-no/github-actions-public/checkout@main
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: true
+          token: ${{ steps.setup-github-app.outputs.app_token }}
+      - uses: ks-no/github-actions-public/download-artifact@main
+        with:
+          name: nuget-packages-signed
+          path: release-packages
+      - uses: ks-no/github-actions-public/create-github-release@main
+        with:
+          current-version: ${{ needs.build.outputs.current-version }}
+          next-version: ${{ needs.build.outputs.next-version }}
+          release-notes: ${{ inputs.releaseNotes || 'No changes specified' }}
+          reviewer: ${{ inputs.reviewer || 'No review required' }}
+          github-token: ${{ steps.setup-github-app.outputs.app_token }}
+          actor: ${{ github.actor }}
+          ref-name: ${{ github.ref_name }}
