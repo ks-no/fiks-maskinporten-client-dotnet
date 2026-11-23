@@ -64,7 +64,7 @@ namespace ExampleApplication
             // The issuer as defined in Maskinporten
             var issuer = Environment.GetEnvironmentVariable("MASKINPORTEN_ISSUER");
 
-            var cert = new X509Certificate2(p12Filename, p12Password);
+            var cert = X509CertificateLoader.LoadPkcs12FromFile(p12Filename, p12Password);
             var configuration = new MaskinportenClientConfiguration(
                 @"https://test.maskinporten.no/", // ID-porten audience path
                 @"https://test.maskinporten.no/token", // ID-porten token path
