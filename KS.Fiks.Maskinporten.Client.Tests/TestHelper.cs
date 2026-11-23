@@ -30,13 +30,13 @@ public static class TestHelper
     public static RSA PrivateKey => _privateKey;
 
     public static X509Certificate2 Certificate =>
-        new X509Certificate2(
+        X509CertificateLoader.LoadPkcs12FromFile(
             "alice-virksomhetssertifikat.p12",
             "PASSWORD",
             X509KeyStorageFlags.EphemeralKeySet);
 
     public static X509Certificate2 CertificateOtherThanUsedForDecode =>
-        new X509Certificate2(
+        X509CertificateLoader.LoadPkcs12FromFile(
             "bob-virksomhetssertifikat.p12",
             "PASSWORD",
             X509KeyStorageFlags.EphemeralKeySet);
