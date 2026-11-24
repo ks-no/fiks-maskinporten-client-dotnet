@@ -14,5 +14,5 @@ metadata:
     - oauth
 spec:
   type: library
-  owner: group:team-tilgang
+  owner: group:team-kjernekomponenter
   lifecycle: production
