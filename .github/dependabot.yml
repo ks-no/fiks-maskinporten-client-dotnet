@@ -7,3 +7,18 @@ updates:
     time: "04:11"
     timezone: Europe/Oslo
   open-pull-requests-limit: 15
+  groups:
+    fiks-deps:
+      patterns:
+        - "KS.Fiks*"
+      update-types:
+        - "minor"
+        - "patch"
+    other-deps:
+      patterns:
+        - "*"
+      exclude-patterns:
+        - "KS.Fiks*"
+      update-types:
+        - "minor"
+        - "patch"
